@@ -3,77 +3,307 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>Shiftify | Gestión de turnos ágil y sencilla</title>
   <meta name="description" content="Shiftify: plataforma digital para gestionar turnos y filas en comercios, bancos y centros de salud mediante código QR.">
   <meta name="author" content="Proyecto individual - Desarrollo Básico de Aplicaciones en Red">
+
+  <!-- Pinta la barra del navegador en móvil con el azul de marca -->
+  <meta name="theme-color" content="#0F172A">
+
+  <!-- Orden importante: primero los tokens (variables), luego quien los usa -->
+  <link rel="stylesheet" href="assets/css/tokens.css">
+  <link rel="stylesheet" href="assets/css/styles.css">
 </head>
 <body>
 
-  <header>
-    <h1>Shiftify</h1>
-    <nav>
-      <a href="#como-funciona">Cómo funciona</a> |
-      <a href="#beneficios">Beneficios</a> |
-      <a href="#contacto">Contacto</a>
-    </nav>
+  <!-- Accesibilidad: primer elemento enfocable con Tab. Invisible hasta
+       que recibe foco; permite saltarse el menú y llegar al contenido. -->
+  <a class="salto-contenido" href="#contenido">Saltar al contenido</a>
+
+  <header class="encabezado">
+    <div class="contenedor encabezado__interior">
+
+      <a class="logo" href="#inicio">
+        <span class="logo__marca" aria-hidden="true">S</span>
+        <span class="logo__texto">Shiftify</span>
+      </a>
+
+      <nav class="navegacion" aria-label="Navegación principal">
+        <ul class="navegacion__lista">
+          <li><a href="#como-funciona">Cómo funciona</a></li>
+          <li><a href="#beneficios">Beneficios</a></li>
+          <li><a href="#contacto">Contacto</a></li>
+        </ul>
+      </nav>
+
+      <a class="boton boton--primario boton--sm encabezado__cta" href="#contacto">
+        Solicita una demo
+      </a>
+
+    </div>
   </header>
 
-  <section id="hero">
-    <h2>Gestión de turnos ágil y sencilla</h2>
-    <p>Shiftify reemplaza la fila física por un turno virtual: tus clientes escanean un código QR, ven cuánto falta desde su celular, y tú obtienes estadísticas automáticas de tu operación.</p>
-    <a href="#contacto">Solicita una demo</a>
-  </section>
+  <main id="contenido">
 
-  <section id="como-funciona">
-    <h2>Cómo funciona</h2>
-    <a href="#">Ver más</a>
+    <!-- ================= HERO ================= -->
+    <section class="hero" id="inicio">
+      <div class="contenedor hero__interior">
 
-    <article>
-      <h3>1. Escanea el QR</h3>
-      <p>El cliente llega al negocio y escanea el código QR ubicado en la entrada para registrarse en la fila virtual.</p>
-    </article>
+        <div class="hero__texto">
+          <p class="etiqueta">Turnos digitales por QR</p>
 
-    <article>
-      <h3>2. Recibe su turno</h3>
-      <p>Desde el celular, el cliente ve su posición en la fila y el tiempo estimado de espera, sin quedarse de pie.</p>
-    </article>
+          <!-- El h1 es la promesa de la página, no el nombre de la marca -->
+          <h1 class="hero__titulo">Gestión de turnos ágil y sencilla</h1>
 
-    <article>
-      <h3>3. El negocio gana control</h3>
-      <p>El administrador consulta en tiempo real cuántos clientes atendió, cuánto se demoró cada turno y el rendimiento del día.</p>
-    </article>
-  </section>
+          <p class="hero__entrada">
+            Shiftify reemplaza la fila física por un turno virtual: tus clientes
+            escanean un código QR, ven cuánto falta desde su celular, y tú obtienes
+            estadísticas automáticas de tu operación.
+          </p>
 
-  <section id="beneficios">
-    <h2>Beneficios</h2>
+          <div class="hero__acciones">
+            <a class="boton boton--primario" href="#contacto">Solicita una demo</a>
+            <a class="boton boton--fantasma" href="#como-funciona">Ver cómo funciona</a>
+          </div>
+        </div>
 
-    <article>
-      <h3>Ahorra tiempo</h3>
-      <p>Tus clientes usan su tiempo libremente en vez de esperar de pie sin información.</p>
-    </article>
+        <!-- Prueba de valor: cifras concretas junto a la promesa -->
+        <ul class="metricas" aria-label="Resultados promedio de los negocios que usan Shiftify">
+          <li class="metrica">
+            <span class="metrica__valor">12 min</span>
+            <span class="metrica__nombre">Espera promedio</span>
+            <span class="metrica__delta metrica__delta--positivo">&darr; 34 % vs. fila física</span>
+          </li>
+          <li class="metrica">
+            <span class="metrica__valor">‑68 %</span>
+            <span class="metrica__nombre">Quejas por espera</span>
+            <span class="metrica__delta metrica__delta--positivo">&darr; desde el primer mes</span>
+          </li>
+          <li class="metrica">
+            <span class="metrica__valor">0</span>
+            <span class="metrica__nombre">Registros manuales</span>
+            <span class="metrica__delta metrica__delta--negativo">Se elimina el papel</span>
+          </li>
+        </ul>
 
-    <article>
-      <h3>Reduce quejas</h3>
-      <p>La transparencia sobre el tiempo de espera evita reclamos y mejora la experiencia del cliente.</p>
-    </article>
+      </div>
+    </section>
 
-    <article>
-      <h3>Estadísticas automáticas</h3>
-      <p>Obtén reportes de atención y rendimiento sin llevar registros manuales.</p>
-    </article>
-  </section>
+    <!-- ================= CÓMO FUNCIONA ================= -->
+    <!-- aria-labelledby: le da nombre accesible a la sección usando su
+         propio título, sin repetir texto. -->
+    <section class="seccion" id="como-funciona" aria-labelledby="titulo-como-funciona">
+      <div class="contenedor">
 
-  <aside id="mockup">
-    <h2>Así lo ve tu cliente</h2>
-    <p>Imagen: mockup del celular mostrando el turno virtual de Shiftify.</p>
-  </aside>
+        <header class="seccion__encabezado">
+          <p class="etiqueta">Cómo funciona</p>
+          <h2 class="seccion__titulo" id="titulo-como-funciona">Tres pasos, sin instalar nada</h2>
+          <p class="seccion__entrada">
+            Ni el cliente ni el negocio necesitan descargar una aplicación:
+            todo ocurre en el navegador.
+          </p>
+        </header>
 
-  <footer id="contacto">
-    <p>Shiftify</p>
-    <p>&copy; 2026 Shiftify. Todos los derechos reservados.</p>
-    <a href="#">Política de privacidad</a> |
-    <a href="#">Términos de servicio</a> |
-    <a href="#">Contacto</a>
+        <!-- <ol> porque el orden SÍ importa. El número lo genera el CSS
+             con un contador, así no queda escrito a mano en el texto. -->
+        <ol class="pasos">
+
+          <li class="paso">
+            <h3 class="paso__titulo">Escanea el QR</h3>
+            <p class="paso__texto">
+              El cliente llega al negocio y escanea el código QR ubicado en la
+              entrada para registrarse en la fila virtual.
+            </p>
+          </li>
+
+          <li class="paso">
+            <h3 class="paso__titulo">Recibe su turno</h3>
+            <p class="paso__texto">
+              Desde el celular, el cliente ve su posición en la fila y el tiempo
+              estimado de espera, sin quedarse de pie.
+            </p>
+          </li>
+
+          <li class="paso">
+            <h3 class="paso__titulo">El negocio gana control</h3>
+            <p class="paso__texto">
+              El administrador consulta en tiempo real cuántos clientes atendió,
+              cuánto se demoró cada turno y el rendimiento del día.
+            </p>
+          </li>
+
+        </ol>
+
+      </div>
+    </section>
+
+    <!-- ================= BENEFICIOS ================= -->
+    <section class="seccion seccion--alterna" id="beneficios" aria-labelledby="titulo-beneficios">
+      <div class="contenedor">
+
+        <header class="seccion__encabezado">
+          <p class="etiqueta">Beneficios</p>
+          <h2 class="seccion__titulo" id="titulo-beneficios">Lo que cambia en tu operación</h2>
+        </header>
+
+        <!-- <ul>: son beneficios equivalentes, sin jerarquía entre ellos -->
+        <ul class="tarjetas">
+
+          <li class="tarjeta">
+            <span class="tarjeta__icono" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                   stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="9"></circle>
+                <path d="M12 7v5l3 2"></path>
+              </svg>
+            </span>
+            <h3 class="tarjeta__titulo">Ahorra tiempo</h3>
+            <p class="tarjeta__texto">
+              Tus clientes usan su tiempo libremente en vez de esperar de pie
+              sin información.
+            </p>
+          </li>
+
+          <li class="tarjeta">
+            <span class="tarjeta__icono" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                   stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.9 8.9 0 0 1-4-.9L3 21l1.9-4.9A8.4 8.4 0 0 1 12 3a8.4 8.4 0 0 1 9 8.5z"></path>
+              </svg>
+            </span>
+            <h3 class="tarjeta__titulo">Reduce quejas</h3>
+            <p class="tarjeta__texto">
+              La transparencia sobre el tiempo de espera evita reclamos y mejora
+              la experiencia del cliente.
+            </p>
+          </li>
+
+          <li class="tarjeta">
+            <span class="tarjeta__icono" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                   stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 20V10M10 20V4M16 20v-7M22 20H2"></path>
+              </svg>
+            </span>
+            <h3 class="tarjeta__titulo">Estadísticas automáticas</h3>
+            <p class="tarjeta__texto">
+              Obtén reportes de atención y rendimiento sin llevar registros
+              manuales.
+            </p>
+          </li>
+
+        </ul>
+
+      </div>
+    </section>
+
+    <!-- ================= MOCKUP =================
+         Era un <aside> con un texto que decía "Imagen: mockup...".
+         Ahora es contenido principal y el teléfono está dibujado con
+         HTML + CSS: no depende de ninguna imagen externa. -->
+    <section class="vitrina" id="mockup" aria-labelledby="titulo-mockup">
+      <div class="contenedor vitrina__interior">
+
+        <div class="vitrina__texto">
+          <p class="etiqueta etiqueta--inversa">Vista del cliente</p>
+          <h2 class="vitrina__titulo" id="titulo-mockup">Así lo ve tu cliente</h2>
+          <p class="vitrina__entrada">
+            Una sola pantalla, sin cuentas ni descargas. El turno se actualiza
+            solo mientras el cliente hace otra cosa.
+          </p>
+
+          <ul class="vitrina__lista">
+            <li>Posición en la fila en tiempo real</li>
+            <li>Tiempo estimado de espera</li>
+            <li>Aviso cuando faltan pocos turnos</li>
+          </ul>
+        </div>
+
+        <!-- Decorativo: la información real ya está en el texto de al lado,
+             por eso el teléfono se oculta a lectores de pantalla. -->
+        <div class="telefono" role="img"
+             aria-label="Pantalla del celular mostrando el turno A-042 con 3 personas por delante y 12 minutos de espera">
+          <div class="telefono__marco">
+            <div class="telefono__muesca" aria-hidden="true"></div>
+            <div class="telefono__pantalla" aria-hidden="true">
+
+              <div class="ticket">
+                <p class="ticket__etiqueta">Tu turno</p>
+                <p class="ticket__codigo">A&#8209;042</p>
+                <p class="ticket__negocio">Sucursal Centro</p>
+              </div>
+
+              <div class="ticket-datos">
+                <div class="ticket-dato">
+                  <span class="ticket-dato__valor">3</span>
+                  <span class="ticket-dato__nombre">Antes que tú</span>
+                </div>
+                <div class="ticket-dato">
+                  <span class="ticket-dato__valor">12<small>min</small></span>
+                  <span class="ticket-dato__nombre">Espera</span>
+                </div>
+              </div>
+
+              <div class="ticket-barra">
+                <div class="ticket-barra__relleno"></div>
+              </div>
+              <p class="ticket-nota">Te avisamos cuando falten 2 turnos</p>
+
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ================= PIE ================= -->
+  <footer class="pie" id="contacto">
+    <div class="contenedor">
+
+      <div class="pie__superior">
+
+        <div class="pie__marca">
+          <a class="logo logo--inverso" href="#inicio">
+            <span class="logo__marca" aria-hidden="true">S</span>
+            <span class="logo__texto">Shiftify</span>
+          </a>
+          <p class="pie__descripcion">
+            Turnos digitales para comercios, bancos y centros de salud.
+          </p>
+        </div>
+
+        <nav class="pie__nav" aria-label="Enlaces del pie de página">
+          <h2 class="pie__titulo">Navegación</h2>
+          <ul>
+            <li><a href="#como-funciona">Cómo funciona</a></li>
+            <li><a href="#beneficios">Beneficios</a></li>
+            <li><a href="#mockup">Vista del cliente</a></li>
+          </ul>
+        </nav>
+
+        <div class="pie__contacto">
+          <h2 class="pie__titulo">Contacto</h2>
+          <ul>
+            <!-- mailto: y tel: hacen el dato accionable desde el móvil -->
+            <li><a href="mailto:hola@shiftify.co">hola@shiftify.co</a></li>
+            <li><a href="tel:+573000000000">+57 300 000 0000</a></li>
+          </ul>
+        </div>
+
+      </div>
+
+      <div class="pie__inferior">
+        <p class="pie__copy">&copy; 2026 Shiftify. Todos los derechos reservados.</p>
+        <ul class="pie__legal">
+          <li><a href="#">Política de privacidad</a></li>
+          <li><a href="#">Términos de servicio</a></li>
+        </ul>
+      </div>
+
+    </div>
   </footer>
 
 </body>

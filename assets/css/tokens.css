@@ -1,0 +1,160 @@
+/* ==========================================================================
+   SHIFTIFY · tokens.css
+   Paleta Ejecutiva — Sobria · Profesional · Confiable
+   --------------------------------------------------------------------------
+   Este archivo NO pinta nada. Solo declara variables (custom properties).
+   La regla es: ningun otro archivo escribe un color en hexadecimal.
+   Si manana cambia la marca, se cambia aqui y se propaga a todo el sitio.
+
+   Esta organizado en 2 capas:
+     CAPA 1 (paleta)  -> el color tal cual, con su nombre de la guia.
+     CAPA 2 (roles)   -> para que SIRVE ese color en la interfaz.
+   Los componentes siempre usan la capa 2, nunca la 1.
+   ========================================================================== */
+
+:root {
+
+  /* ---------------------------------------------------------------
+     CAPA 1 · PALETA
+     Nombres identicos a los de la guia de marca.
+     --------------------------------------------------------------- */
+
+  /* Azules — identidad y acento */
+  --azul-oscuro:      #0F172A;  /* fondos de alto contraste */
+  --azul-principal:   #1D4ED8;  /* acento, botones, enlaces */
+  --azul-claro:       #93C5FD;  /* detalles sobre fondo oscuro */
+
+  /* Grises — estructura */
+  --gris-oscuro:      #374151;
+  --gris-medio:       #9CA3AF;
+  --gris-claro:       #E5E7EB;
+
+  /* Bases */
+  --fondo:            #F8FAFC;
+  --blanco:           #FFFFFF;
+
+  /* Texto */
+  --texto-principal:  #111827;
+  --texto-secundario: #6B7280;
+
+  /* Semanticos — solo para datos, nunca decorativos.
+     --positivo queda reservado: es el verde de marca y solo es valido como
+     RELLENO (umbral 3:1). Hoy ningun componente lo necesita, pero se
+     conserva porque forma parte de la guia. Para texto, ver abajo. */
+  --positivo:         #16A34A;
+  --negativo:         #DC2626;
+
+  /* El verde de marca sobre blanco da 3.30:1 y NO cumple WCAG AA para
+     texto pequeno (minimo 4.5:1). Se conserva #16A34A para rellenos y
+     se usa esta variante oscurecida cuando el verde es TEXTO. */
+  --positivo-texto:   #15803D;
+
+
+  /* ---------------------------------------------------------------
+     CAPA 2 · ROLES
+     Aqui se decide el USO. Un componente pide "superficie-elevada",
+     no pide "blanco": asi el dia que la marca cambie, no hay que
+     tocar ni una linea de los componentes.
+     --------------------------------------------------------------- */
+
+  /* Superficies */
+  --superficie-base:     var(--fondo);
+  --superficie-elevada:  var(--blanco);
+  --superficie-oscura:   var(--azul-oscuro);
+
+  /* Contenido (texto e iconos) */
+  --contenido-fuerte:    var(--texto-principal);
+  --contenido-medio:     var(--gris-oscuro);   /* cuerpo de texto pequeno */
+  --contenido-suave:     var(--texto-secundario);
+  --contenido-inverso:   var(--blanco);
+  --contenido-inverso-suave: var(--gris-medio);
+
+  /* Bordes */
+  --borde:               var(--gris-claro);
+  --borde-fuerte:        var(--gris-medio);
+  --borde-inverso:       rgba(255, 255, 255, 0.12);
+
+  /* Estados (ver nota de contraste arriba) */
+  --dato-positivo:       var(--positivo-texto);
+  --dato-negativo:       var(--negativo);
+
+  /* Acento / interaccion */
+  --acento:              var(--azul-principal);
+  --acento-hover:        #1741B6;  /* azul-principal oscurecido ~10% */
+  --acento-suave:        #EFF4FE;  /* azul-principal al 5% sobre blanco */
+  --acento-inverso:      var(--azul-claro);
+
+
+  /* ---------------------------------------------------------------
+     TIPOGRAFIA
+     Escala modular (razon 1.25). Con clamp() el texto se adapta al
+     ancho sin necesidad de media queries.
+     --------------------------------------------------------------- */
+
+  --fuente-base: system-ui, -apple-system, "Segoe UI", Roboto,
+                 "Helvetica Neue", Arial, sans-serif;
+
+  --texto-xs:   0.8125rem;                        /* 13px · etiquetas */
+  --texto-sm:   0.9375rem;                        /* 15px · apoyo     */
+  --texto-md:   1rem;                             /* 16px · cuerpo    */
+  --texto-lg:   clamp(1.0625rem, 0.4vw + 1rem, 1.1875rem);
+  --texto-xl:   clamp(1.25rem,  0.6vw + 1.1rem, 1.5rem);
+  --texto-2xl:  clamp(1.5rem,   1.4vw + 1.2rem, 2rem);
+  --texto-3xl:  clamp(2rem,     3.2vw + 1.2rem, 3.25rem);
+
+  --peso-medio:    500;
+  --peso-semi:     600;
+  --peso-fuerte:   700;
+
+  --alto-linea-titulo: 1.15;
+  --alto-linea-texto:  1.65;
+
+  /* Ancho comodo de lectura: ~65 caracteres */
+  --medida-lectura: 65ch;
+
+
+  /* ---------------------------------------------------------------
+     ESPACIADO
+     Escala de 4px. Usar SIEMPRE estos pasos evita el
+     "aqui 13px, alla 15px" que descuadra los disenos.
+     --------------------------------------------------------------- */
+
+  --e-1:  0.25rem;   /*  4px */
+  --e-2:  0.5rem;    /*  8px */
+  --e-3:  0.75rem;   /* 12px */
+  --e-4:  1rem;      /* 16px */
+  --e-5:  1.5rem;    /* 24px */
+  --e-6:  2rem;      /* 32px */
+  --e-7:  3rem;      /* 48px */
+  --e-8:  4rem;      /* 64px */
+  --e-9:  6rem;      /* 96px */
+
+  /* Respiro vertical de cada seccion: se encoge en movil solo */
+  --ritmo-seccion: clamp(3.5rem, 8vw, 6rem);
+
+
+  /* ---------------------------------------------------------------
+     FORMA Y PROFUNDIDAD
+     Sombras muy sutiles: la paleta ejecutiva se apoya en el borde,
+     no en el drama visual.
+     --------------------------------------------------------------- */
+
+  --radio-sm:   6px;
+  --radio-md:   10px;
+  --radio-lg:   16px;
+  --radio-full: 999px;
+
+  --sombra-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
+  --sombra-md: 0 4px 12px rgba(15, 23, 42, 0.06);
+  --sombra-lg: 0 16px 40px rgba(15, 23, 42, 0.10);
+
+
+  /* ---------------------------------------------------------------
+     LAYOUT Y MOVIMIENTO
+     --------------------------------------------------------------- */
+
+  --ancho-contenido: 1120px;
+  --relleno-lateral: clamp(1rem, 4vw, 2rem);
+
+  --transicion: 160ms ease;
+}

@@ -1,0 +1,757 @@
+/* ==========================================================================
+   SHIFTIFY · styles.css
+   --------------------------------------------------------------------------
+   Depende de tokens.css. Regla del proyecto: aqui NO se escribe ningun
+   color en hexadecimal, todo se pide con una variable de rol.
+
+   Estrategia: mobile-first. El CSS base describe el movil y las
+   @media (min-width) van AGREGANDO complejidad para pantallas grandes.
+
+   Indice
+     01. Reset
+     02. Base
+     03. Utilidades
+     04. Botones
+     05. Encabezado
+     06. Hero y metricas
+     07. Secciones
+     08. Pasos
+     09. Tarjetas
+     10. Vitrina y telefono
+     11. Pie
+     12. Preferencias del usuario
+   ========================================================================== */
+
+
+/* ==========================================================================
+   01. RESET
+   ========================================================================== */
+
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+* { margin: 0; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+/* Compensa el encabezado fijo al saltar con un enlace #ancla */
+html:focus-within { scroll-behavior: smooth; }
+
+body { min-height: 100vh; }
+
+img, svg, video {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+ul, ol { list-style: none; padding: 0; }
+
+a { color: inherit; text-decoration: none; }
+
+/* Los titulos no deben partir palabras de forma fea */
+h1, h2, h3 {
+  line-height: var(--alto-linea-titulo);
+  text-wrap: balance;
+}
+
+p { text-wrap: pretty; }
+
+
+/* ==========================================================================
+   02. BASE
+   ========================================================================== */
+
+body {
+  font-family: var(--fuente-base);
+  font-size: var(--texto-md);
+  line-height: var(--alto-linea-texto);
+  color: var(--contenido-fuerte);
+  background-color: var(--superficie-base);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Foco visible unificado. Se estiliza, nunca se elimina: es la unica
+   pista que tiene quien navega con teclado. */
+:focus-visible {
+  outline: 2px solid var(--acento);
+  outline-offset: 2px;
+  border-radius: var(--radio-sm);
+}
+
+::selection {
+  background-color: var(--acento);
+  color: var(--contenido-inverso);
+}
+
+
+/* ==========================================================================
+   03. UTILIDADES
+   ========================================================================== */
+
+/* Centra y limita el ancho. Todas las secciones lo usan por dentro,
+   asi el fondo ocupa el 100% pero el contenido queda alineado. */
+.contenedor {
+  width: 100%;
+  max-width: var(--ancho-contenido);
+  margin-inline: auto;
+  padding-inline: var(--relleno-lateral);
+}
+
+/* Enlace de salto: fuera de pantalla hasta recibir foco */
+.salto-contenido {
+  position: absolute;
+  top: var(--e-3);
+  left: var(--e-3);
+  z-index: 100;
+  padding: var(--e-2) var(--e-4);
+  border-radius: var(--radio-sm);
+  background-color: var(--acento);
+  color: var(--contenido-inverso);
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-semi);
+  transform: translateY(-200%);
+  transition: transform var(--transicion);
+}
+.salto-contenido:focus { transform: translateY(0); }
+
+/* Antetitulo en versalitas que precede a cada h2 */
+.etiqueta {
+  margin-bottom: var(--e-3);
+  color: var(--acento);
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-semi);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.etiqueta--inversa { color: var(--acento-inverso); }
+
+
+/* ==========================================================================
+   04. BOTONES
+   ========================================================================== */
+
+.boton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--e-2);
+  padding: var(--e-3) var(--e-5);
+  border: 1px solid transparent;
+  border-radius: var(--radio-sm);
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-semi);
+  line-height: 1.2;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color var(--transicion),
+              border-color var(--transicion),
+              box-shadow var(--transicion),
+              transform var(--transicion);
+}
+
+.boton--sm { padding: var(--e-2) var(--e-4); }
+
+.boton--primario {
+  background-color: var(--acento);
+  color: var(--contenido-inverso);
+  box-shadow: var(--sombra-sm);
+}
+.boton--primario:hover {
+  background-color: var(--acento-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--sombra-md);
+}
+
+.boton--fantasma {
+  border-color: var(--borde);
+  background-color: var(--superficie-elevada);
+  color: var(--contenido-fuerte);
+}
+.boton--fantasma:hover {
+  border-color: var(--borde-fuerte);
+  background-color: var(--acento-suave);
+  color: var(--acento);
+}
+
+
+/* ==========================================================================
+   05. ENCABEZADO
+   ========================================================================== */
+
+.encabezado {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  border-bottom: 1px solid var(--borde);
+  background-color: rgb(255 255 255 / 0.85);
+  backdrop-filter: blur(10px);
+}
+
+/* En movil el menu baja a una segunda fila (order: 3 + width: 100%).
+   Es un menu responsive sin una sola linea de JavaScript. */
+.encabezado__interior {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--e-3);
+  min-height: 64px;
+}
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--e-2);
+  margin-right: auto;
+  font-size: var(--texto-lg);
+  font-weight: var(--peso-fuerte);
+  letter-spacing: -0.02em;
+}
+
+.logo__marca {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radio-sm);
+  background-color: var(--acento);
+  color: var(--contenido-inverso);
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-fuerte);
+}
+
+.logo--inverso { color: var(--contenido-inverso); }
+
+.navegacion {
+  order: 3;
+  width: 100%;
+  border-top: 1px solid var(--borde);
+}
+
+.navegacion__lista {
+  display: flex;
+  justify-content: center;
+  gap: var(--e-5);
+  padding-block: var(--e-3);
+}
+
+.navegacion__lista a {
+  position: relative;
+  color: var(--contenido-suave);
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
+  transition: color var(--transicion);
+}
+.navegacion__lista a:hover { color: var(--contenido-fuerte); }
+
+/* Subrayado que crece desde el centro al pasar el cursor */
+.navegacion__lista a::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -4px;
+  width: 0;
+  height: 2px;
+  background-color: var(--acento);
+  transform: translateX(-50%);
+  transition: width var(--transicion);
+}
+.navegacion__lista a:hover::after { width: 100%; }
+
+@media (min-width: 900px) {
+  .encabezado__interior { min-height: 72px; }
+  .navegacion {
+    order: 0;
+    width: auto;
+    border-top: 0;
+    margin-right: var(--e-5);
+  }
+  .navegacion__lista { padding-block: 0; }
+}
+
+
+/* ==========================================================================
+   06. HERO Y METRICAS
+   ========================================================================== */
+
+.hero {
+  position: relative;
+  overflow: hidden;
+  padding-block: var(--ritmo-seccion);
+  border-bottom: 1px solid var(--borde);
+  background-color: var(--superficie-elevada);
+}
+
+/* Halo azul muy tenue detras del titular. Decorativo, por eso va
+   en un pseudoelemento y no en el HTML. */
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: -40% 40% 55% -10%;
+  background: radial-gradient(50% 50% at 50% 50%,
+              rgb(147 197 253 / 0.30), transparent 70%);
+  pointer-events: none;
+}
+
+.hero__interior { position: relative; }
+
+.hero__texto { max-width: 44rem; }
+
+.hero__titulo {
+  font-size: var(--texto-3xl);
+  font-weight: var(--peso-fuerte);
+  letter-spacing: -0.025em;
+}
+
+.hero__entrada {
+  max-width: var(--medida-lectura);
+  margin-top: var(--e-5);
+  color: var(--contenido-suave);
+  font-size: var(--texto-lg);
+}
+
+.hero__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e-3);
+  margin-top: var(--e-6);
+}
+
+/* Metricas: 1 columna en movil, 3 en escritorio */
+.metricas {
+  display: grid;
+  gap: var(--e-5);
+  margin-top: var(--e-8);
+  padding-top: var(--e-6);
+  border-top: 1px solid var(--borde);
+}
+
+.metrica { display: flex; flex-direction: column; gap: var(--e-1); }
+
+.metrica__valor {
+  font-size: var(--texto-2xl);
+  font-weight: var(--peso-fuerte);
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.metrica__nombre {
+  color: var(--contenido-suave);
+  font-size: var(--texto-sm);
+}
+
+/* Verde y rojo SOLO aqui: son datos, no decoracion */
+.metrica__delta {
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-medio);
+}
+.metrica__delta--positivo { color: var(--dato-positivo); }
+.metrica__delta--negativo { color: var(--dato-negativo); }
+
+@media (min-width: 720px) {
+  .metricas { grid-template-columns: repeat(3, 1fr); gap: var(--e-6); }
+}
+
+
+/* ==========================================================================
+   07. SECCIONES
+   ========================================================================== */
+
+.seccion { padding-block: var(--ritmo-seccion); }
+
+/* Alterna el fondo entre secciones para separarlas sin usar bordes */
+.seccion--alterna {
+  border-block: 1px solid var(--borde);
+  background-color: var(--superficie-elevada);
+}
+
+.seccion__encabezado {
+  max-width: var(--medida-lectura);
+  margin-bottom: var(--e-7);
+}
+
+.seccion__titulo {
+  font-size: var(--texto-2xl);
+  font-weight: var(--peso-fuerte);
+  letter-spacing: -0.02em;
+}
+
+.seccion__entrada {
+  margin-top: var(--e-3);
+  color: var(--contenido-suave);
+  font-size: var(--texto-lg);
+}
+
+
+/* ==========================================================================
+   08. PASOS
+   ========================================================================== */
+
+/* El contador reemplaza el "1." "2." "3." que antes estaba escrito
+   dentro del texto. Si se agrega o reordena un paso, se renumera solo. */
+.pasos {
+  counter-reset: paso;
+  display: grid;
+  gap: var(--e-6);
+}
+
+.paso {
+  position: relative;
+  padding-top: var(--e-5);
+  border-top: 2px solid var(--borde);
+}
+
+.paso::before {
+  counter-increment: paso;
+  content: counter(paso, decimal-leading-zero);
+  display: block;
+  margin-bottom: var(--e-3);
+  color: var(--acento);
+  font-size: var(--texto-xl);
+  font-weight: var(--peso-fuerte);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+.paso__titulo {
+  font-size: var(--texto-lg);
+  font-weight: var(--peso-semi);
+}
+
+.paso__texto {
+  max-width: var(--medida-lectura);
+  margin-top: var(--e-2);
+  color: var(--contenido-medio);
+  font-size: var(--texto-sm);
+}
+
+@media (min-width: 800px) {
+  .pasos { grid-template-columns: repeat(3, 1fr); gap: var(--e-6); }
+}
+
+
+/* ==========================================================================
+   09. TARJETAS
+   ========================================================================== */
+
+.tarjetas { display: grid; gap: var(--e-4); }
+
+.tarjeta {
+  padding: var(--e-6) var(--e-5);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-lg);
+  background-color: var(--superficie-base);
+  transition: border-color var(--transicion),
+              box-shadow var(--transicion),
+              transform var(--transicion);
+}
+.tarjeta:hover {
+  border-color: var(--acento-inverso);
+  box-shadow: var(--sombra-md);
+  transform: translateY(-2px);
+}
+
+.tarjeta__icono {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin-bottom: var(--e-4);
+  border-radius: var(--radio-md);
+  background-color: var(--acento-suave);
+  color: var(--acento);
+}
+.tarjeta__icono svg { width: 22px; height: 22px; }
+
+.tarjeta__titulo {
+  font-size: var(--texto-lg);
+  font-weight: var(--peso-semi);
+}
+
+.tarjeta__texto {
+  margin-top: var(--e-2);
+  color: var(--contenido-medio);
+  font-size: var(--texto-sm);
+}
+
+@media (min-width: 800px) {
+  .tarjetas { grid-template-columns: repeat(3, 1fr); gap: var(--e-5); }
+}
+
+
+/* ==========================================================================
+   10. VITRINA Y TELEFONO
+   ========================================================================== */
+
+.vitrina {
+  padding-block: var(--ritmo-seccion);
+  background-color: var(--superficie-oscura);
+  color: var(--contenido-inverso);
+}
+
+.vitrina__interior {
+  display: grid;
+  gap: var(--e-8);
+  align-items: center;
+}
+
+.vitrina__titulo {
+  font-size: var(--texto-2xl);
+  font-weight: var(--peso-fuerte);
+  letter-spacing: -0.02em;
+}
+
+.vitrina__entrada {
+  max-width: var(--medida-lectura);
+  margin-top: var(--e-4);
+  color: var(--contenido-inverso-suave);
+  font-size: var(--texto-lg);
+}
+
+.vitrina__lista {
+  display: grid;
+  gap: var(--e-3);
+  margin-top: var(--e-6);
+}
+
+.vitrina__lista li {
+  position: relative;
+  padding-left: var(--e-6);
+  color: var(--contenido-inverso-suave);
+  font-size: var(--texto-sm);
+}
+
+/* Palomita dibujada con dos bordes y una rotacion: sin iconos extra */
+.vitrina__lista li::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 0.55em;
+  width: 10px;
+  height: 6px;
+  border-left: 2px solid var(--acento-inverso);
+  border-bottom: 2px solid var(--acento-inverso);
+  transform: rotate(-45deg);
+}
+
+/* --- Telefono ------------------------------------------------------- */
+
+.telefono { display: flex; justify-content: center; }
+
+.telefono__marco {
+  position: relative;
+  width: 100%;
+  max-width: 300px;
+  padding: var(--e-4);
+  padding-top: var(--e-6);
+  border: 1px solid var(--borde-inverso);
+  border-radius: 34px;
+  background-color: rgb(255 255 255 / 0.06);
+  box-shadow: var(--sombra-lg);
+}
+
+.telefono__muesca {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  width: 82px;
+  height: 5px;
+  border-radius: var(--radio-full);
+  background-color: var(--borde-inverso);
+  transform: translateX(-50%);
+}
+
+.telefono__pantalla {
+  padding: var(--e-5) var(--e-4);
+  border-radius: 24px;
+  background-color: var(--superficie-elevada);
+  color: var(--contenido-fuerte);
+}
+
+.ticket { text-align: center; }
+
+.ticket__etiqueta {
+  color: var(--contenido-suave);
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-semi);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ticket__codigo {
+  margin-top: var(--e-1);
+  color: var(--acento);
+  font-size: 2.75rem;
+  font-weight: var(--peso-fuerte);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+
+.ticket__negocio {
+  color: var(--contenido-suave);
+  font-size: var(--texto-xs);
+}
+
+.ticket-datos {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--e-3);
+  margin-top: var(--e-5);
+}
+
+.ticket-dato {
+  padding: var(--e-3);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-md);
+  background-color: var(--superficie-base);
+  text-align: center;
+}
+
+.ticket-dato__valor {
+  display: block;
+  font-size: var(--texto-xl);
+  font-weight: var(--peso-fuerte);
+  font-variant-numeric: tabular-nums;
+}
+.ticket-dato__valor small {
+  margin-left: 2px;
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-medio);
+  color: var(--contenido-suave);
+}
+
+.ticket-dato__nombre {
+  color: var(--contenido-suave);
+  font-size: var(--texto-xs);
+}
+
+.ticket-barra {
+  height: 6px;
+  margin-top: var(--e-5);
+  border-radius: var(--radio-full);
+  background-color: var(--gris-claro);
+  overflow: hidden;
+}
+
+.ticket-barra__relleno {
+  width: 68%;
+  height: 100%;
+  border-radius: var(--radio-full);
+  background-color: var(--acento);
+}
+
+.ticket-nota {
+  margin-top: var(--e-2);
+  color: var(--contenido-suave);
+  font-size: var(--texto-xs);
+  text-align: center;
+}
+
+@media (min-width: 900px) {
+  .vitrina__interior {
+    grid-template-columns: 1fr auto;
+    gap: var(--e-9);
+  }
+  .telefono__marco { width: 300px; }
+}
+
+
+/* ==========================================================================
+   11. PIE
+   ========================================================================== */
+
+.pie {
+  padding-block: var(--e-8) var(--e-5);
+  border-top: 1px solid var(--borde-inverso);
+  background-color: var(--superficie-oscura);
+  color: var(--contenido-inverso);
+}
+
+.pie__superior {
+  display: grid;
+  gap: var(--e-6);
+  padding-bottom: var(--e-6);
+}
+
+.pie__descripcion {
+  max-width: 34ch;
+  margin-top: var(--e-3);
+  color: var(--contenido-inverso-suave);
+  font-size: var(--texto-sm);
+}
+
+/* h2 real (jerarquia correcta) pero con tamano de etiqueta */
+.pie__titulo {
+  margin-bottom: var(--e-3);
+  color: var(--contenido-inverso);
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-semi);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.pie__nav ul,
+.pie__contacto ul {
+  display: grid;
+  gap: var(--e-2);
+}
+
+.pie__nav a,
+.pie__contacto a,
+.pie__legal a {
+  color: var(--contenido-inverso-suave);
+  font-size: var(--texto-sm);
+  transition: color var(--transicion);
+}
+.pie__nav a:hover,
+.pie__contacto a:hover,
+.pie__legal a:hover { color: var(--acento-inverso); }
+
+.pie__inferior {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e-3) var(--e-5);
+  align-items: center;
+  justify-content: space-between;
+  padding-top: var(--e-5);
+  border-top: 1px solid var(--borde-inverso);
+}
+
+.pie__copy {
+  color: var(--contenido-inverso-suave);
+  font-size: var(--texto-xs);
+}
+
+.pie__legal { display: flex; gap: var(--e-5); }
+
+@media (min-width: 800px) {
+  .pie__superior {
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: var(--e-7);
+  }
+}
+
+
+/* ==========================================================================
+   12. PREFERENCIAS DEL USUARIO
+   ========================================================================== */
+
+/* Respeta a quien configuro su sistema para reducir el movimiento
+   (mareos, migranas, vestibular). No es opcional. */
+@media (prefers-reduced-motion: reduce) {
+  html:focus-within { scroll-behavior: auto; }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .boton--primario:hover,
+  .tarjeta:hover { transform: none; }
+}
