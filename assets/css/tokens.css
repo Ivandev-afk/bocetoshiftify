@@ -23,6 +23,7 @@
   --azul-oscuro:      #0F172A;  /* fondos de alto contraste */
   --azul-principal:   #1D4ED8;  /* acento, botones, enlaces */
   --azul-claro:       #93C5FD;  /* detalles sobre fondo oscuro */
+  --ambar:            #F59E0B;  /* acento cálido del logotipo */
 
   /* Grises — estructura */
   --gris-oscuro:      #374151;
@@ -83,6 +84,7 @@
   --acento-hover:        #1741B6;  /* azul-principal oscurecido ~10% */
   --acento-suave:        #EFF4FE;  /* azul-principal al 5% sobre blanco */
   --acento-inverso:      var(--azul-claro);
+  --acento-calido:       var(--ambar);
 
 
   /* ---------------------------------------------------------------

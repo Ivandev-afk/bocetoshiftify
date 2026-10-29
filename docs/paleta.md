@@ -14,6 +14,7 @@ Este documento es solo referencia; **no** se copian colores desde aquí.
 | Azul oscuro | `--azul-oscuro` | `#0F172A` | Fondos de alto contraste: vitrina y pie |
 | Azul principal | `--azul-principal` | `#1D4ED8` | Acento: botones, enlaces, antetítulos |
 | Azul claro | `--azul-claro` | `#93C5FD` | Detalles sobre fondo oscuro, halo del hero |
+| Ámbar | `--ambar` | `#F59E0B` | Acento cálido tomado del logotipo; uso decorativo |
 | Gris oscuro | `--gris-oscuro` | `#374151` | Cuerpo de texto pequeño |
 | Gris medio | `--gris-medio` | `#9CA3AF` | Texto sobre fondo oscuro, bordes fuertes |
 | Gris claro | `--gris-claro` | `#E5E7EB` | Bordes y separadores |
@@ -59,6 +60,9 @@ Por eso existe una variante exclusiva para texto:
 
 Los componentes piden `var(--dato-positivo)` y no necesitan saber que
 detrás hay dos verdes distintos.
+
+El ámbar del logotipo se reserva para detalles decorativos sobre el fondo
+oscuro; no se usa para texto pequeño.
 
 ---
 
