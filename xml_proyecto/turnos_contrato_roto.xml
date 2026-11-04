@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- =========================================================
+     turnos.xml
+     Respuesta que el SERVIDOR de Shiftify envía al CLIENTE
+     cuando este solicita la fila de atención de una sede.
+     Cada <turno> corresponde a una fila de la tabla "turnos".
+     ========================================================= -->
+
+<!-- Declaración de tipo de documento: indica que las reglas
+     están en el archivo externo turnos.dtd -->
+<!DOCTYPE turnos SYSTEM "turnos.dtd">
+
+<!-- Elemento raíz: la fila de una sede en una fecha -->
+<turnos sede="Sucursal Centro" fecha="2026-11-03">
+
+  <!-- Turno atendido: ya tiene duración de la atención -->
+  <turno id="T001" estado="atendido">
+    <codigo>A-001</codigo>
+    <nombre>Laura Castro</nombre>
+    <hora>08:02</hora>
+    <espera unidad="min">0</espera>
+    <duracion unidad="min">6</duracion>
+  </turno>
+
+  <turno id="T002" estado="atendido">
+    <codigo>A-002</codigo>
+    <nombre>Andrés Gómez</nombre>
+    <hora>08:05</hora>
+    <espera unidad="min">3</espera>
+    <duracion unidad="min">9</duracion>
+  </turno>
+
+  <turno id="T003" estado="atendido">
+    <codigo>A-003</codigo>
+    <nombre>María José Rincón</nombre>
+    <hora>08:11</hora>
+    <espera unidad="min">6</espera>
+    <duracion unidad="min">4</duracion>
+  </turno>
+
+  <turno id="T004" estado="atendido">
+    <codigo>A-004</codigo>
+    <nombre>Carlos Pérez</nombre>
+    <hora>08:14</hora>
+    <espera unidad="min">7</espera>
+    <duracion unidad="min">12</duracion>
+  </turno>
+
+  <!-- Turno en ventanilla: aún no tiene duración (elemento opcional) -->
+  <turno id="T005" estado="atendiendo">
+    <codigo>A-005</codigo>
+    <nombre>Sofía Herrera</nombre>
+    <hora>08:20</hora>
+    <espera unidad="min">13</espera>
+  </turno>
+
+  <!-- Turnos en la fila: la espera cuenta hasta el momento del reporte -->
+  <turno id="T006" estado="esperando">
+    <codigo>A-006</codigo>
+    <nombre>Juan David Ortiz</nombre>
+    <hora>08:23</hora>
+    <espera unidad="min">15</espera>
+  </turno>
+
+  <turno id="T007" estado="esperando">
+    <codigo>A-007</codigo>
+    <nombre>Valentina Ruiz</nombre>
+    <hora>08:31</hora>
+    <espera>7</espera>
+  </turno>
+
+</turnos>

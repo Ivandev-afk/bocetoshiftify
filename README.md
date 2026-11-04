@@ -50,6 +50,10 @@ sesión y es la dirección que iría en el código QR.
 │   └── funciones.php       Crear turno, código A-001, minutos por turno e iniciales.
 ├── database/
 │   └── shiftify.sql        Crea la base de datos, las tablas y el usuario de prueba.
+├── xml_proyecto/           Práctica XML: la fila de turnos como XML con DTD, XPath y XSLT.
+│   ├── turnos.xml / .dtd / .xsl   Documento, contrato y hoja de transformación.
+│   ├── api_xml.php         Servicio que genera el XML desde la tabla turnos.
+│   └── servicio.php        Servicio que entrega turnos.xml tal cual.
 ├── assets/
 │   ├── img/
 │   │   └── shiftify-logo.png  Logotipo de marca.

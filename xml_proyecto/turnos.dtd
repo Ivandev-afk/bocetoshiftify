@@ -1,0 +1,31 @@
+<!-- =========================================================
+     turnos.dtd
+     Reglas estructurales que debe cumplir turnos.xml
+     (contrato entre el servidor y el cliente de Shiftify)
+     ========================================================= -->
+
+<!-- El elemento raíz "turnos" contiene UNO o MÁS turnos (+) -->
+<!ELEMENT turnos (turno+)>
+<!-- Atributos obligatorios de la fila -->
+<!ATTLIST turnos
+          sede  CDATA #REQUIRED
+          fecha CDATA #REQUIRED>
+
+<!-- Cada turno tiene, EN ESTE ORDEN: código, cliente, hora, espera
+     y, opcionalmente (?), la duración de la atención -->
+<!ELEMENT turno (codigo, cliente, hora, espera, duracion?)>
+<!-- id: identificador único (tipo ID: no se repite y empieza por letra)
+     estado: los mismos tres valores del ENUM de la tabla turnos -->
+<!ATTLIST turno
+          id     ID                                   #REQUIRED
+          estado (esperando | atendiendo | atendido)  #REQUIRED>
+
+<!-- Elementos que solo contienen texto (#PCDATA) -->
+<!ELEMENT codigo   (#PCDATA)>
+<!ELEMENT cliente  (#PCDATA)>
+<!ELEMENT hora     (#PCDATA)>
+<!ELEMENT espera   (#PCDATA)>
+<!ELEMENT duracion (#PCDATA)>
+<!-- unidad es opcional; si no se escribe, vale "min" -->
+<!ATTLIST espera   unidad CDATA "min">
+<!ATTLIST duracion unidad CDATA "min">
