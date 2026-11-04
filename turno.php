@@ -77,7 +77,7 @@ $conexion->close();
       <img class="marca__imagen" src="assets/img/shiftify-logo.png" alt="Shiftify">
 
       <?php if ($mostrarFormulario): ?>
-        <h1>Tu nombre</h1>
+        <h1>Pide tu turno</h1>
         <p class="turno__nota">Sin filas ni papeles: espera donde quieras y sigue la fila desde aquí.</p>
 
         <?php if ($error): ?>
@@ -87,7 +87,7 @@ $conexion->close();
         <form class="app-formulario app-formulario--apilado" action="turno.php" method="POST">
           <input type="hidden" name="accion" value="pedir">
           <label for="nombre">Tu nombre</label>
-          <input id="nombre" name="nombre" type="text" maxlength="100" autocomplete="name" placeholder="Ej. Laura Castro" value="<?= htmlspecialchars($nombre) ?>" required>
+          <input id="nombre" name="nombre" type="text" maxlength="100" autocomplete="name" placeholder="Tu nombre" value="<?= htmlspecialchars($nombre) ?>" required>
           <button class="boton" type="submit">Tomar turno <span aria-hidden="true">→</span></button>
         </form>
 
