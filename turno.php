@@ -77,7 +77,7 @@ $conexion->close();
       <img class="marca__imagen" src="assets/img/shiftify-logo.png" alt="Shiftify">
 
       <?php if ($mostrarFormulario): ?>
-        <h1>Pide tu turno</h1>
+        <h1>Tu nombre</h1>
         <p class="turno__nota">Sin filas ni papeles: espera donde quieras y sigue la fila desde aquí.</p>
 
         <?php if ($error): ?>
