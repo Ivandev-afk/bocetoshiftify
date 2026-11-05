@@ -8,23 +8,33 @@
 // proyecto; si la carpeta se copió a otro lugar, la del proyecto original.
 $includes = is_dir(__DIR__ . '/../includes')
     ? __DIR__ . '/../includes'
-    : 'C:/Users/ivant/OneDrive/Documentos/Desarrollo en redes/shiftify/bocetoshiftify/includes';
+    : 'C:/Users/ivant/OneDrive/Documentos/Desarrollo en redes/shiftify/proyecto-shiftify/includes';
 
 require $includes . '/conexion.php';
 require $includes . '/funciones.php';
 
-// 1. Datos: turnos de hoy en orden de llegada.
+// Empresa cuya fila se pide: api_xml.php?e=salon-dona-cecilia (por defecto, la de prueba)
+$empresa = empresaPorSlug($conexion, $_GET['e'] ?? 'shiftify');
+
+if (!$empresa) {
+    http_response_code(404);
+    header('Content-Type: text/plain; charset=UTF-8');
+    echo "No existe esa empresa.";
+    exit;
+}
+
+// 1. Datos: turnos de hoy de esa empresa, en orden de llegada.
 //    espera   = minutos desde que pidió el turno hasta que lo llamaron (o hasta ahora)
 //    duracion = minutos de atención; NULL si todavía no ha terminado
-$registros = $conexion->query("
-    SELECT id, nombre, estado,
+$registros = consultar($conexion, "
+    SELECT id, numero, nombre, estado,
            DATE_FORMAT(creado, '%H:%i')                            AS hora,
            TIMESTAMPDIFF(MINUTE, creado, COALESCE(llamado, NOW())) AS espera,
            TIMESTAMPDIFF(MINUTE, llamado, finalizado)              AS duracion
     FROM turnos
-    WHERE DATE(creado) = CURDATE()
-    ORDER BY id
-")->fetch_all(MYSQLI_ASSOC);
+    WHERE empresa_id = ? AND DATE(creado) = CURDATE()
+    ORDER BY numero
+", "i", $empresa['id'])->fetch_all(MYSQLI_ASSOC);
 
 // La fecha la da MySQL, igual que CURDATE() arriba (PHP puede estar en otra zona horaria)
 $fecha = $conexion->query("SELECT CURDATE() AS hoy")->fetch_assoc()["hoy"];
@@ -49,7 +59,7 @@ $documento->formatOutput = true;           // sangría para que sea legible
 
 // 3. Elemento raíz con sus atributos
 $raiz = $documento->createElement('turnos');
-$raiz->setAttribute('sede', 'Sucursal Centro');
+$raiz->setAttribute('sede', $empresa['nombre']);
 $raiz->setAttribute('fecha', $fecha);
 $documento->appendChild($raiz);
 
@@ -61,7 +71,7 @@ foreach ($registros as $fila) {
     $turno->setAttribute('estado', $fila['estado']);
 
     $campos = [
-        'codigo'  => codigoTurno((int) $fila['id']),
+        'codigo'  => codigoTurno((int) $fila['numero']),
         'cliente' => $fila['nombre'],
         'hora'    => $fila['hora'],
         'espera'  => $fila['espera'],

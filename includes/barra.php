@@ -13,7 +13,7 @@ $pestanas = [
     </a>
 
     <div class="barra__acciones">
-      <span class="app-usuario">Hola, <strong><?= htmlspecialchars($_SESSION["usuario_nombre"]) ?></strong></span>
+      <span class="app-usuario">Hola, <strong><?= htmlspecialchars($_SESSION["usuario_nombre"]) ?></strong> · <?= htmlspecialchars($_SESSION["empresa_nombre"]) ?></span>
       <a class="boton boton--claro boton--pequeno" href="salir.php">Cerrar sesión</a>
     </div>
   </div>
@@ -23,5 +23,5 @@ $pestanas = [
   <?php foreach ($pestanas as $clave => [$enlace, $texto]): ?>
     <a href="<?= $enlace ?>"<?= $clave === $paginaActual ? ' aria-current="page"' : "" ?>><?= $texto ?></a>
   <?php endforeach; ?>
-  <a href="turno.php" target="_blank" rel="noopener">Vista del cliente <span aria-hidden="true">↗</span></a>
+  <a href="turno.php?e=<?= urlencode($_SESSION["empresa_slug"]) ?>" target="_blank" rel="noopener">Vista del cliente <span aria-hidden="true">↗</span></a>
 </nav>

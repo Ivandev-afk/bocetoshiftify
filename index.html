@@ -6,8 +6,8 @@
   <meta name="theme-color" content="#0F172A">
   <meta name="description" content="Shiftify convierte las filas en turnos digitales claros y fáciles de gestionar.">
   <title>Shiftify | La fila avanza</title>
-  <link rel="stylesheet" href="assets/css/tokens.css">
-  <link rel="stylesheet" href="assets/css/styles.css">
+  <link rel="stylesheet" href="assets/css/tokens.css?v=3">
+  <link rel="stylesheet" href="assets/css/styles.css?v=3">
 </head>
 <body class="pagina-inicio">
   <a class="salto" href="#contenido">Saltar al contenido</a>
@@ -147,7 +147,7 @@
             <span class="home-paso__icono" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 4h5v5H4zM15 4h5v5h-5zM4 15h5v5H4zM15 15h2v2h-2zM20 15v5M15 20h2M12 4v2M12 10v2M4 12h2M10 12h2M20 12h-3"/></svg>
             </span>
-            <h3>Escanea</h3>
+            <h3><a class="home-paso__enlace" href="#qr">Escanea</a></h3>
             <p>Un QR y ya estás en la fila.</p>
             <span class="home-paso__flecha" aria-hidden="true">↗</span>
           </li>
@@ -156,7 +156,7 @@
             <span class="home-paso__icono" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
             </span>
-            <h3>Sigue tu turno</h3>
+            <h3><a class="home-paso__enlace" href="turno.php?e=shiftify">Sigue tu turno</a></h3>
             <p>Mira cómo avanza desde tu celular.</p>
             <span class="home-paso__flecha" aria-hidden="true">↗</span>
           </li>
@@ -170,6 +170,18 @@
             <span class="home-paso__flecha" aria-hidden="true">↗</span>
           </li>
         </ol>
+      </div>
+
+      <!-- Ventana del QR: se abre con #qr (:target), sin JavaScript -->
+      <div class="qr-modal" id="qr" role="dialog" aria-modal="true" aria-labelledby="qr-titulo">
+        <a class="qr-modal__fondo" href="#como-funciona" tabindex="-1" aria-hidden="true"></a>
+        <div class="qr-modal__caja">
+          <a class="qr-modal__cerrar" href="#como-funciona" aria-label="Cerrar">×</a>
+          <h3 id="qr-titulo">Escanea y pide tu turno</h3>
+          <img class="qr-modal__imagen" src="qr.php?e=shiftify" width="240" height="240" alt="Código QR que abre la página para pedir turno">
+          <p>Abre la cámara del celular y apunta al código para entrar a la fila.</p>
+          <a class="qr-modal__enlace" href="turno.php?e=shiftify">O abre la página aquí <span aria-hidden="true">→</span></a>
+        </div>
       </div>
     </section>
 

@@ -2,7 +2,7 @@
 session_start();
 
 // Si ya inició sesión, no tiene sentido mostrarle el formulario
-if (isset($_SESSION["usuario_id"])) {
+if (isset($_SESSION["usuario_id"], $_SESSION["empresa_id"])) {
     header("Location: panel.php");
     exit;
 }
@@ -22,7 +22,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $error = "Escribe un correo válido y tu contraseña.";
     } else {
         // 3. Buscar al usuario con una consulta preparada
-        $stmt = $conexion->prepare("SELECT id, nombre, contrasena FROM usuarios WHERE correo = ?");
+        $stmt = $conexion->prepare("
+            SELECT u.id, u.nombre, u.contrasena, u.empresa_id, e.nombre AS empresa, e.slug
+            FROM usuarios u JOIN empresas e ON e.id = u.empresa_id
+            WHERE u.correo = ?
+        ");
         $stmt->bind_param("s", $correo);
         $stmt->execute();
         $usuario = $stmt->get_result()->fetch_assoc();
@@ -33,6 +37,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             session_regenerate_id(true);
             $_SESSION["usuario_id"]     = $usuario["id"];
             $_SESSION["usuario_nombre"] = $usuario["nombre"];
+            // La empresa decide qué fila y qué equipo ve en el panel
+            $_SESSION["empresa_id"]     = $usuario["empresa_id"];
+            $_SESSION["empresa_nombre"] = $usuario["empresa"];
+            $_SESSION["empresa_slug"]   = $usuario["slug"];
             header("Location: panel.php");
             exit;
         }
@@ -52,8 +60,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   <meta name="theme-color" content="#0F172A">
   <meta name="description" content="Accede al espacio de trabajo de Shiftify.">
   <title>Iniciar sesión | Shiftify</title>
-  <link rel="stylesheet" href="assets/css/tokens.css">
-  <link rel="stylesheet" href="assets/css/styles.css">
+  <link rel="stylesheet" href="assets/css/tokens.css?v=3">
+  <link rel="stylesheet" href="assets/css/styles.css?v=3">
 </head>
 <body class="pagina-login">
   <a class="salto" href="#acceso">Saltar al acceso</a>
@@ -98,7 +106,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             <p class="login__estado<?= $error ? " login__estado--error" : "" ?>" role="status" aria-live="polite"><?= htmlspecialchars($error) ?></p>
           </form>
 
-          <p class="login__nota">¿Aún no tienes acceso? <a href="mailto:hola@shiftify.co">Contacta a tu administrador.</a></p>
+          <p class="login__nota">¿Tu negocio aún no usa Shiftify? <a href="registro.php">Regístralo aquí.</a></p>
+          <p class="login__nota">¿Tu negocio ya está registrado? Pide tu cuenta a tu administrador.</p>
         </div>
 
         <p class="login__copyright">© 2026 Shiftify. Todos los derechos reservados.</p>

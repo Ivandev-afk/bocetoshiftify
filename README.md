@@ -17,18 +17,29 @@ El inicio de sesión usa PHP y MySQL, así que el proyecto se sirve con
    dentro de `htdocs` (PowerShell):
 
    ```powershell
-   New-Item -ItemType Junction -Path C:\xampp\htdocs\bocetoshiftify -Target "<ruta de este proyecto>"
+   New-Item -ItemType Junction -Path C:\xampp\htdocs\proyecto-shiftify -Target "<ruta de este proyecto>"
    ```
 
 3. Crea la base de datos: abre `http://localhost/phpmyadmin`, pestaña **SQL**,
    pega el contenido de [database/shiftify.sql](database/shiftify.sql) y pulsa
-   **Continuar**.
-4. Abre `http://localhost/bocetoshiftify/`.
+   **Continuar**. Si ya tenías la base de antes, sin empresas, ejecuta
+   [database/multiempresa.sql](database/multiempresa.sql) una sola vez.
+4. Abre `http://localhost/proyecto-shiftify/`.
 
 Usuario de prueba: `admin@shiftify.co` / `Shiftify2026`.
 
-La página para clientes es `http://localhost/bocetoshiftify/turno.php`: no pide
-sesión y es la dirección que iría en el código QR.
+### Varias empresas
+
+Todo vive en una sola base de datos. Cada negocio es una fila de la tabla
+`empresas`, y cada usuario y cada turno guarda su `empresa_id`. El panel filtra
+todas las consultas por la empresa de la sesión, así que un negocio nunca ve la
+fila ni el equipo de otro. Los turnos se numeran por empresa: cada una empieza
+en A-001.
+
+- Un negocio nuevo se registra en `registro.php`, enlazado desde el login.
+- La página para clientes lleva la empresa en la dirección:
+  `http://localhost/proyecto-shiftify/turno.php?e=shiftify`. Esa es la
+  dirección del código QR, que cada negocio ve en su panel.
 
 ---
 
@@ -38,18 +49,23 @@ sesión y es la dirección que iría en el código QR.
 .
 ├── index.html              Landing compacta con vista previa del panel.
 ├── login.php               Inicio de sesión contra la tabla usuarios.
+├── registro.php            Registro de un negocio nuevo con su primera cuenta.
 ├── panel.php               Panel de atención: métricas del día, turno actual y fila.
 ├── turnos.php              Acciones del panel: dar turno, llamar al siguiente, finalizar.
 ├── usuarios.php            Equipo: lista de cuentas y alta de miembros nuevos.
 ├── turno.php               Página pública (la del QR): el cliente pide turno y sigue la fila.
+├── qr.php                  Imagen del QR de la fila de una empresa.
 ├── salir.php               Cierra la sesión.
 ├── includes/
 │   ├── conexion.php        Conexión a MySQL (usuario root de XAMPP).
 │   ├── sesion.php          Protege las páginas privadas.
 │   ├── barra.php           Barra superior y pestañas de las páginas privadas.
-│   └── funciones.php       Crear turno, código A-001, minutos por turno e iniciales.
+│   └── funciones.php       Consultas preparadas, empresas, crear turno, código A-001, minutos por turno.
 ├── database/
-│   └── shiftify.sql        Crea la base de datos, las tablas y el usuario de prueba.
+│   ├── shiftify.sql        Crea la base de datos, las tablas y el usuario de prueba.
+│   ├── multiempresa.sql    Pasa una base de antes a varias empresas.
+│   └── hosting.sql         Igual que shiftify.sql, para la base que crea el hosting.
+├── publicar.ps1            Enlace público temporal (Cloudflare) para probar el QR desde cualquier red.
 ├── xml_proyecto/           Práctica XML: la fila de turnos como XML con DTD, XPath y XSLT.
 │   ├── turnos.xml / .dtd / .xsl   Documento, contrato y hoja de transformación.
 │   ├── api_xml.php         Servicio que genera el XML desde la tabla turnos.

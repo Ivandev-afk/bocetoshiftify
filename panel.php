@@ -8,20 +8,22 @@ $aviso = $_SESSION["aviso"] ?? "";
 $error = $_SESSION["error"] ?? "";
 unset($_SESSION["aviso"], $_SESSION["error"]);
 
+// Todo se filtra por la empresa de la sesión: cada negocio ve solo su fila
+
 // Turno que se está atendiendo
-$actual = $conexion->query("SELECT id, nombre, DATE_FORMAT(llamado, '%H:%i') AS hora FROM turnos WHERE estado = 'atendiendo' LIMIT 1")->fetch_assoc();
+$actual = consultar($conexion, "SELECT numero, nombre, DATE_FORMAT(llamado, '%H:%i') AS hora FROM turnos WHERE empresa_id = ? AND estado = 'atendiendo' LIMIT 1", "i", $empresaId)->fetch_assoc();
 
 // Personas en fila, la más antigua primero
-$fila = $conexion->query("SELECT id, nombre, DATE_FORMAT(creado, '%H:%i') AS hora FROM turnos WHERE estado = 'esperando' ORDER BY id")->fetch_all(MYSQLI_ASSOC);
+$fila = consultar($conexion, "SELECT numero, nombre, DATE_FORMAT(creado, '%H:%i') AS hora FROM turnos WHERE empresa_id = ? AND estado = 'esperando' ORDER BY numero", "i", $empresaId)->fetch_all(MYSQLI_ASSOC);
 
 // Resumen del día
-$hoy = $conexion->query("
+$hoy = consultar($conexion, "
     SELECT DATE_FORMAT(CURDATE(), '%d/%m/%Y') AS fecha, COUNT(*) AS atendidos
     FROM turnos
-    WHERE estado = 'atendido' AND DATE(finalizado) = CURDATE()
-")->fetch_assoc();
+    WHERE empresa_id = ? AND estado = 'atendido' AND DATE(finalizado) = CURDATE()
+", "i", $empresaId)->fetch_assoc();
 
-$minutosPorTurno = minutosPorTurno($conexion);
+$minutosPorTurno = minutosPorTurno($conexion, $empresaId);
 $conexion->close();
 
 $esperando = count($fila);
@@ -34,8 +36,8 @@ $paginaActual = "panel";
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0F172A">
   <title>Panel de atención | Shiftify</title>
-  <link rel="stylesheet" href="assets/css/tokens.css">
-  <link rel="stylesheet" href="assets/css/styles.css">
+  <link rel="stylesheet" href="assets/css/tokens.css?v=3">
+  <link rel="stylesheet" href="assets/css/styles.css?v=3">
 </head>
 <body class="pagina-panel">
   <a class="salto" href="#contenido">Saltar al contenido</a>
@@ -75,7 +77,7 @@ $paginaActual = "panel";
           <h2 id="actual-titulo">Atendiendo ahora</h2>
 
           <?php if ($actual): ?>
-            <p class="app-actual__codigo"><?= codigoTurno($actual["id"]) ?></p>
+            <p class="app-actual__codigo"><?= codigoTurno($actual["numero"]) ?></p>
             <p class="app-actual__nombre"><?= htmlspecialchars($actual["nombre"]) ?></p>
             <p class="app-nota">Llamado a las <?= $actual["hora"] ?></p>
           <?php else: ?>
@@ -107,6 +109,12 @@ $paginaActual = "panel";
             </div>
           </form>
         </section>
+
+        <section class="app-tarjeta app-qr" aria-labelledby="qr-titulo">
+          <h2 id="qr-titulo">QR de tu fila</h2>
+          <p class="app-nota">Imprímelo y ponlo en la entrada: quien lo escanee entra a la fila de <?= htmlspecialchars($_SESSION["empresa_nombre"]) ?>.</p>
+          <img src="qr.php?e=<?= urlencode($_SESSION["empresa_slug"]) ?>" width="200" height="200" alt="Código QR de la fila de <?= htmlspecialchars($_SESSION["empresa_nombre"]) ?>">
+        </section>
       </div>
 
       <section class="app-tarjeta" aria-labelledby="fila-titulo">
@@ -121,7 +129,7 @@ $paginaActual = "panel";
           <ol class="app-fila">
             <?php foreach ($fila as $posicion => $turno): ?>
               <li class="app-turno">
-                <span class="app-turno__codigo"><?= codigoTurno($turno["id"]) ?></span>
+                <span class="app-turno__codigo"><?= codigoTurno($turno["numero"]) ?></span>
                 <span class="app-turno__persona"><i aria-hidden="true"><?= htmlspecialchars(iniciales($turno["nombre"])) ?></i> <?= htmlspecialchars($turno["nombre"]) ?></span>
                 <span class="app-turno__tiempo"><?= $turno["hora"] ?> · ~<?= ($posicion + 1) * $minutosPorTurno ?> min</span>
               </li>

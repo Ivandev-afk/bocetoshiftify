@@ -37,8 +37,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         } else {
             // 4. Guardar la contraseña cifrada, nunca en texto plano
             $hash = password_hash($contrasena, PASSWORD_DEFAULT);
-            $stmt = $conexion->prepare("INSERT INTO usuarios (nombre, correo, contrasena) VALUES (?, ?, ?)");
-            $stmt->bind_param("sss", $nombre, $correo, $hash);
+            // La cuenta nueva entra a la misma empresa de quien la crea
+            $stmt = $conexion->prepare("INSERT INTO usuarios (empresa_id, nombre, correo, contrasena) VALUES (?, ?, ?, ?)");
+            $stmt->bind_param("isss", $empresaId, $nombre, $correo, $hash);
             $stmt->execute();
             $stmt->close();
 
@@ -52,7 +53,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 $aviso = $_SESSION["aviso"] ?? "";
 unset($_SESSION["aviso"]);
 
-$equipo = $conexion->query("SELECT id, nombre, correo, DATE_FORMAT(creado, '%d/%m/%Y') AS alta FROM usuarios ORDER BY nombre")->fetch_all(MYSQLI_ASSOC);
+// Solo el equipo de la empresa de la sesión
+$equipo = consultar($conexion, "SELECT id, nombre, correo, DATE_FORMAT(creado, '%d/%m/%Y') AS alta FROM usuarios WHERE empresa_id = ? ORDER BY nombre", "i", $empresaId)->fetch_all(MYSQLI_ASSOC);
 $conexion->close();
 
 $paginaActual = "usuarios";
@@ -64,8 +66,8 @@ $paginaActual = "usuarios";
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0F172A">
   <title>Equipo | Shiftify</title>
-  <link rel="stylesheet" href="assets/css/tokens.css">
-  <link rel="stylesheet" href="assets/css/styles.css">
+  <link rel="stylesheet" href="assets/css/tokens.css?v=3">
+  <link rel="stylesheet" href="assets/css/styles.css?v=3">
 </head>
 <body class="pagina-panel">
   <a class="salto" href="#contenido">Saltar al contenido</a>
