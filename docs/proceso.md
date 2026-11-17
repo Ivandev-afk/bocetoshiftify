@@ -166,6 +166,41 @@ Antes de dar por cerrado el trabajo se comprobó que:
 
 ---
 
+## 9. Respuesta a la revisión del proyecto
+
+La revisión pidió tres cosas: completar los mockups de las pantallas
+operativas, actualizar la versión publicada y verificar las reglas de negocio
+durante la implementación.
+
+**Mockups de las pantallas operativas.** Antes solo la landing tenía una vista
+previa del producto. Ahora [pantallas/](../pantallas/index.html) reúne las 10
+pantallas operativas: registro, acceso, panel recién creado, panel en plena
+atención, equipo, y las cinco que ve el cliente desde el QR. No están dibujadas
+a mano: [pruebas/maquetas.php](../pruebas/maquetas.php) recorre un
+día de atención real y guarda lo que entrega PHP. Así no pueden quedar
+desactualizadas respecto del sistema. Cada maqueta se navega: sus botones
+llevan a la pantalla que vendría después.
+
+**Versión publicada.** GitHub Pages ya mostraba la última landing, pero tenía
+dos problemas: el enlace «Iniciar sesión» descargaba el código fuente de
+`login.php`, y `includes/conexion.php` y los `.sql` se podían descargar.
+[_config.yml](../_config.yml) los saca de la publicación, y
+[404.html](../404.html) explica que esas pantallas necesitan el servidor y
+lleva a las maquetas. La landing enlaza la galería desde el menú.
+
+**Reglas de negocio.** Se escribieron las 26 reglas en
+[reglas-negocio.md](reglas-negocio.md), con su motivo y el archivo que las
+aplica, y [pruebas/reglas_negocio.php](../pruebas/reglas_negocio.php) las
+comprueba contra el sistema real. La primera ejecución encontró un defecto
+real (RN-21): un turno que quedaba esperando de un día anterior se colaba
+primero en la fila de hoy. Se corrigió. Resultado actual: **26 de 26**
+([reglas-resultado.md](reglas-resultado.md)).
+
+Esto también cierra la «prueba completa con MySQL encendido» que el informe de
+PHP y MySQL dejó pendiente el 9 de noviembre.
+
+---
+
 ## Pendientes
 
 - [ ] Formulario real en la sección de contacto (hoy es solo `mailto:`).

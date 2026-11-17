@@ -31,8 +31,8 @@ if ($accion === "crear") {
     if ($accion === "finalizar") {
         $_SESSION["aviso"] = "Atención finalizada.";
     } else {
-        // 2. Llamar al primero de la fila de esta empresa
-        $siguiente = consultar($conexion, "SELECT id, numero, nombre FROM turnos WHERE empresa_id = ? AND estado = 'esperando' ORDER BY numero LIMIT 1 FOR UPDATE", "i", $empresaId)->fetch_assoc();
+        // 2. Llamar al primero de la fila de hoy de esta empresa
+        $siguiente = consultar($conexion, "SELECT id, numero, nombre FROM turnos WHERE empresa_id = ? AND estado = 'esperando' AND DATE(creado) = CURDATE() ORDER BY numero LIMIT 1 FOR UPDATE", "i", $empresaId)->fetch_assoc();
 
         if ($siguiente) {
             $stmt = $conexion->prepare("UPDATE turnos SET estado = 'atendiendo', llamado = NOW() WHERE id = ?");

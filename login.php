@@ -60,8 +60,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   <meta name="theme-color" content="#0F172A">
   <meta name="description" content="Accede al espacio de trabajo de Shiftify.">
   <title>Iniciar sesión | Shiftify</title>
-  <link rel="stylesheet" href="assets/css/tokens.css?v=4">
-  <link rel="stylesheet" href="assets/css/styles.css?v=4">
+  <link rel="stylesheet" href="assets/css/tokens.css?v=5">
+  <link rel="stylesheet" href="assets/css/styles.css?v=5">
 </head>
 <body class="pagina-login">
   <a class="salto" href="#acceso">Saltar al acceso</a>

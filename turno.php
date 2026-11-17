@@ -19,13 +19,23 @@ function turnoDeLaSesion(mysqli $conexion, int $empresaId): ?array
         return null;
     }
 
-    return consultar($conexion, "
+    $turno = consultar($conexion, "
         SELECT t.numero, t.nombre, t.estado,
+               t.estado = 'esperando' AND DATE(t.creado) < CURDATE() AS vencido,
                (SELECT COUNT(*) FROM turnos f
-                WHERE f.empresa_id = t.empresa_id AND f.estado = 'esperando' AND f.numero < t.numero) AS antes
+                WHERE f.empresa_id = t.empresa_id AND f.estado = 'esperando'
+                  AND DATE(f.creado) = CURDATE() AND f.numero < t.numero) AS antes
         FROM turnos t
         WHERE t.id = ? AND t.empresa_id = ?
     ", "ii", $_SESSION["mis_turnos"][$empresaId], $empresaId)->fetch_assoc();
+
+    // Un turno que quedó esperando otro día ya no está en la fila: puede pedir uno nuevo
+    if (!$turno || $turno["vencido"]) {
+        unset($_SESSION["mis_turnos"][$empresaId]);
+        return null;
+    }
+
+    return $turno;
 }
 
 if ($empresa) {
@@ -75,8 +85,8 @@ $conexion->close();
     <meta http-equiv="refresh" content="15">
   <?php endif; ?>
   <title><?= $empresa ? "Turno en " . htmlspecialchars($empresa["nombre"]) : "Tu turno" ?> | Shiftify</title>
-  <link rel="stylesheet" href="assets/css/tokens.css?v=4">
-  <link rel="stylesheet" href="assets/css/styles.css?v=4">
+  <link rel="stylesheet" href="assets/css/tokens.css?v=5">
+  <link rel="stylesheet" href="assets/css/styles.css?v=5">
 </head>
 <body class="pagina-turno">
   <main class="turno">

@@ -28,6 +28,41 @@ El inicio de sesión usa PHP y MySQL, así que el proyecto se sirve con
 
 Usuario de prueba: `admin@shiftify.co` / `Shiftify2026`.
 
+### Versión publicada
+
+**https://ivandev-afk.github.io/bocetoshiftify/**
+
+GitHub Pages solo sirve páginas estáticas, así que ahí no corren PHP ni MySQL.
+Lo que se publica es la landing y las
+[maquetas de las pantallas](https://ivandev-afk.github.io/bocetoshiftify/pantallas/index.html):
+copias reales del panel, del equipo y de la página del cliente, navegables con
+datos de ejemplo. Los archivos PHP y de servidor no se publican
+([_config.yml](_config.yml)); quien abra una de esas direcciones ve
+[404.html](404.html), que lo lleva a las maquetas.
+
+### Reglas de negocio y maquetas
+
+Las 26 reglas de negocio están en [docs/reglas-negocio.md](docs/reglas-negocio.md)
+y se verifican de forma automática contra el sistema real. Con MySQL encendido:
+
+```powershell
+# Ventana 1: servidor de prueba, conectado a la base shiftify_pruebas
+powershell -ExecutionPolicy Bypass -File pruebas\servidor.ps1
+
+# Ventana 2
+C:\xampp\php\php.exe pruebas\reglas_negocio.php   # verifica las reglas → docs/reglas-resultado.md
+C:\xampp\php\php.exe pruebas\maquetas.php         # vuelve a generar pantallas/*.html
+```
+
+Ninguno de los dos toca la base real `shiftify`: crean `shiftify_pruebas` y la
+borran al terminar.
+
+> **Antivirus.** Avast marca como `IDP.Generic` cualquier script PHP de consola
+> que hace peticiones HTTP (le pasa también al `cliente.php` de la práctica
+> XML) y lo pone en cuarentena al terminar. Es un falso positivo: si ocurre,
+> restaura el archivo desde el Baúl de virus y agrega la carpeta del proyecto
+> como excepción.
+
 ### Varias empresas
 
 Todo vive en una sola base de datos. Cada negocio es una fila de la tabla
@@ -66,6 +101,16 @@ en A-001.
 │   ├── multiempresa.sql    Pasa una base de antes a varias empresas.
 │   └── hosting.sql         Igual que shiftify.sql, para la base que crea el hosting.
 ├── publicar.ps1            Enlace público temporal (Cloudflare) para probar el QR desde cualquier red.
+├── pantallas/              Maquetas estáticas de las pantallas operativas (se ven en GitHub Pages).
+│   ├── index.html          Galería: personal del negocio y cliente desde el QR, con sus reglas.
+│   └── *.html              Cada pantalla, generada desde el sistema real por maquetas.php.
+├── pruebas/
+│   ├── reglas_negocio.php  Verifica las 26 reglas de negocio contra el sistema real.
+│   ├── maquetas.php        Genera pantallas/*.html recorriendo un día de atención.
+│   ├── servidor.ps1        Servidor de PHP conectado a la base de prueba.
+│   └── lib.php             Base de prueba y "navegador" con su cookie de sesión.
+├── _config.yml             GitHub Pages: no publicar los archivos PHP ni de servidor.
+├── 404.html                Página de GitHub Pages para las direcciones que necesitan PHP.
 ├── xml_proyecto/           Práctica XML: la fila de turnos como XML con DTD, XPath y XSLT.
 │   ├── turnos.xml / .dtd / .xsl   Documento, contrato y hoja de transformación.
 │   ├── api_xml.php         Servicio que genera el XML desde la tabla turnos.
@@ -77,8 +122,10 @@ en A-001.
 │   │   ├── tokens.css      Paleta y escalas como variables CSS.
 │   │   └── styles.css      Layout y componentes; no contiene hexadecimales.
 └── docs/
-    ├── proceso.md         Bitácora de decisiones de diseño.
-    └── paleta.md          Referencia de paleta y contraste de tokens.
+    ├── proceso.md          Bitácora de decisiones de diseño.
+    ├── paleta.md           Referencia de paleta y contraste de tokens.
+    ├── reglas-negocio.md   Las reglas de negocio: qué, por qué y dónde se aplican.
+    └── reglas-resultado.md Último resultado de la verificación (lo escribe reglas_negocio.php).
 ```
 
 ### Por qué el CSS está partido en dos
@@ -98,6 +145,8 @@ variables, no buscar y reemplazar colores por todo el proyecto.
 |---|---|
 | Sin frameworks (no Bootstrap, no Tailwind) | El objetivo es demostrar HTML y CSS. Un framework escondería precisamente lo que se evalúa. |
 | Sin JavaScript | Todo lo resuelve PHP en el servidor. La página del cliente se mantiene al día con `<meta http-equiv="refresh">` cada 15 segundos. |
+| Maquetas generadas, no dibujadas | Las pantallas de `pantallas/` salen del sistema real; si cambia una vista, se regeneran y no quedan desactualizadas. |
+| Pruebas por HTTP, sin framework | `reglas_negocio.php` usa la aplicación como un navegador: lo que verifica es lo que vería una persona. |
 | PHP + MySQL (XAMPP) | Consultas preparadas contra inyección SQL, contraseñas guardadas con `password_hash()` y sesión regenerada al entrar. |
 | Diseño responsive | La landing y la pantalla de acceso se adaptan a móviles y escritorio con CSS. |
 | Variables CSS nativas | Sin preprocesador (Sass) ni paso de compilación. Funcionan en todos los navegadores actuales. |

@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0F172A">
+  <meta name="description" content="Registra tu negocio en Shiftify.">
+  <title>Registra tu negocio | Shiftify</title>
+  <link rel="stylesheet" href="../assets/css/tokens.css?v=5">
+  <link rel="stylesheet" href="../assets/css/styles.css?v=5">
+</head>
+<body class="pagina-login">
+  <p class="maqueta-aviso">Maqueta con datos de ejemplo · <a href="index.html">Ver todas las pantallas</a></p>
+  <a class="salto" href="#acceso">Saltar al registro</a>
+
+  <main class="login">
+    <section class="login__visual" aria-label="Shiftify, gestión simple de turnos">
+      <a class="marca marca--inversa" href="../index.html">
+        <img class="marca__imagen" src="../assets/img/shiftify-logo.png" alt="Shiftify">
+      </a>
+
+      <div class="login__mensaje">
+        <p class="insignia insignia--oscura"><span class="insignia__punto"></span> Tu negocio, tu fila</p>
+        <h1>Cada negocio<br>con <span>su propia fila.</span></h1>
+        <p>Tu QR, tus turnos y tu equipo, separados de los demás negocios.</p>
+      </div>
+      <span class="login__decoracion" aria-hidden="true"></span>
+    </section>
+
+    <section class="login__panel" id="acceso">
+      <div class="login__panel-interior">
+        <a class="login__volver" href="login.html"><span aria-hidden="true">←</span> Ya tengo cuenta</a>
+
+        <div class="login__formulario">
+          <p class="sobrelinea">Empieza gratis</p>
+          <h2 id="registro-titulo">Registra tu negocio</h2>
+          <p class="login__ayuda">Tú serás la primera cuenta; después puedes sumar a tu equipo.</p>
+
+          <form class="login__campos" action="panel-nuevo.html" method="get" aria-labelledby="registro-titulo">
+            <label for="negocio">Nombre del negocio</label>
+            <input id="negocio" type="text" maxlength="100" autocomplete="organization" value="">
+
+            <label for="nombre">Tu nombre</label>
+            <input id="nombre" type="text" maxlength="100" autocomplete="name" value="">
+
+            <label for="correo">Correo electrónico</label>
+            <input id="correo" type="email" maxlength="150" autocomplete="username" placeholder="nombre@negocio.com" value="">
+
+            <label for="contrasena">Contraseña</label>
+            <input id="contrasena" type="password" autocomplete="new-password" placeholder="Mínimo 8 caracteres">
+
+            <label for="confirmar">Repite la contraseña</label>
+            <input id="confirmar" type="password" autocomplete="new-password">
+
+            <button class="boton login__boton" type="submit">Crear mi negocio <span aria-hidden="true">→</span></button>
+            <p class="login__estado" role="status" aria-live="polite"></p>
+          </form>
+        </div>
+
+        <p class="login__copyright">© 2026 Shiftify. Todos los derechos reservados.</p>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

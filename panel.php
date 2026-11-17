@@ -13,8 +13,9 @@ unset($_SESSION["aviso"], $_SESSION["error"]);
 // Turno que se está atendiendo
 $actual = consultar($conexion, "SELECT numero, nombre, DATE_FORMAT(llamado, '%H:%i') AS hora FROM turnos WHERE empresa_id = ? AND estado = 'atendiendo' LIMIT 1", "i", $empresaId)->fetch_assoc();
 
-// Personas en fila, la más antigua primero
-$fila = consultar($conexion, "SELECT numero, nombre, DATE_FORMAT(creado, '%H:%i') AS hora FROM turnos WHERE empresa_id = ? AND estado = 'esperando' ORDER BY numero", "i", $empresaId)->fetch_all(MYSQLI_ASSOC);
+// Personas en fila hoy, la más antigua primero.
+// Quien quedó esperando otro día ya se fue: no entra en la fila de hoy.
+$fila = consultar($conexion, "SELECT numero, nombre, DATE_FORMAT(creado, '%H:%i') AS hora FROM turnos WHERE empresa_id = ? AND estado = 'esperando' AND DATE(creado) = CURDATE() ORDER BY numero", "i", $empresaId)->fetch_all(MYSQLI_ASSOC);
 
 // Resumen del día
 $hoy = consultar($conexion, "
@@ -36,8 +37,8 @@ $paginaActual = "panel";
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0F172A">
   <title>Panel de atención | Shiftify</title>
-  <link rel="stylesheet" href="assets/css/tokens.css?v=4">
-  <link rel="stylesheet" href="assets/css/styles.css?v=4">
+  <link rel="stylesheet" href="assets/css/tokens.css?v=5">
+  <link rel="stylesheet" href="assets/css/styles.css?v=5">
 </head>
 <body class="pagina-panel">
   <a class="salto" href="#contenido">Saltar al contenido</a>

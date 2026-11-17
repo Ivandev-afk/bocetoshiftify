@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0F172A">
+  <title>Panel de atención | Shiftify</title>
+  <link rel="stylesheet" href="../assets/css/tokens.css?v=5">
+  <link rel="stylesheet" href="../assets/css/styles.css?v=5">
+</head>
+<body class="pagina-panel">
+  <p class="maqueta-aviso">Maqueta con datos de ejemplo · <a href="index.html">Ver todas las pantallas</a></p>
+  <a class="salto" href="#contenido">Saltar al contenido</a>
+
+  <header class="barra">
+  <div class="contenedor barra__interior">
+    <a class="marca" href="../index.html" aria-label="Shiftify, inicio">
+      <img class="marca__imagen" src="../assets/img/shiftify-logo.png" alt="Shiftify">
+    </a>
+
+    <div class="barra__acciones">
+      <span class="app-usuario">Hola, <strong>Cecilia Gómez</strong> · Salón Doña Cecilia</span>
+      <a class="boton boton--claro boton--pequeno" href="login.html">Cerrar sesión</a>
+    </div>
+  </div>
+</header>
+
+<nav class="contenedor app-pestanas" aria-label="Secciones del panel">
+      <a href="panel.html" aria-current="page">Fila de atención</a>
+      <a href="equipo.html">Equipo</a>
+    <a href="turno-pedir.html" target="_blank" rel="noopener">Vista del cliente <span aria-hidden="true">↗</span></a>
+</nav>
+
+  <main class="contenedor app" id="contenido">
+    <div class="app-cabecera">
+      <p class="sobrelinea">Panel de atención</p>
+      <h1>Fila de hoy <span>17/11/2026</span></h1>
+    </div>
+
+          <p class="app-aviso" role="status">¡Listo! Salón Doña Cecilia ya tiene su fila. Imprime el QR de abajo y ponlo en la entrada.</p>
+
+    <section class="app-metricas" aria-label="Resumen de la fila">
+      <div class="app-metrica app-metrica--principal">
+        <span>Personas esperando</span>
+        <strong>00</strong>
+      </div>
+      <div class="app-metrica">
+        <span>Atendidos hoy</span>
+        <strong>00</strong>
+      </div>
+      <div class="app-metrica">
+        <span>Espera estimada</span>
+        <strong>0<small> min</small></strong>
+      </div>
+    </section>
+
+    <div class="app-columnas">
+      <div class="app-columna">
+        <section class="app-tarjeta" aria-labelledby="actual-titulo">
+          <h2 id="actual-titulo">Atendiendo ahora</h2>
+
+                      <p class="app-nota app-vacio">Nadie en atención.</p>
+
+          <div class="app-acciones">
+            <form action="panel.html" method="get">
+              <button class="boton" type="submit" disabled>Llamar siguiente <span aria-hidden="true">→</span></button>
+            </form>
+                      </div>
+        </section>
+
+        <section class="app-tarjeta" aria-labelledby="nuevo-titulo">
+          <h2 id="nuevo-titulo">Nuevo turno</h2>
+          <form class="app-formulario" action="panel.html" method="get">
+            <label for="nombre">Nombre de la persona</label>
+            <div class="app-formulario__fila">
+              <input id="nombre" type="text" maxlength="100" placeholder="Ej. Laura Castro">
+              <button class="boton" type="submit">Dar turno</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="app-tarjeta app-qr" aria-labelledby="qr-titulo">
+          <h2 id="qr-titulo">QR de tu fila</h2>
+          <p class="app-nota">Imprímelo y ponlo en la entrada: quien lo escanee entra a la fila de Salón Doña Cecilia.</p>
+          <img src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&amp;margin=8&amp;data=https%3A%2F%2Fivandev-afk.github.io%2Fbocetoshiftify%2Fpantallas%2Fturno-pedir.html" width="200" height="200" alt="Código QR de la fila de Salón Doña Cecilia">
+        </section>
+      </div>
+
+      <section class="app-tarjeta" aria-labelledby="fila-titulo">
+        <div class="app-tarjeta__titulo">
+          <h2 id="fila-titulo">Siguiente en fila</h2>
+          <span class="app-contador">0</span>
+        </div>
+
+                  <p class="app-nota app-vacio">No hay nadie esperando.</p>
+              </section>
+    </div>
+  </main>
+</body>
+</html>
