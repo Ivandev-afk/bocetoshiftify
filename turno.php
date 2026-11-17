@@ -74,14 +74,19 @@ $conexion->close();
     <!-- Recarga cada 15 s para que la posición en la fila esté al día -->
     <meta http-equiv="refresh" content="15">
   <?php endif; ?>
-  <title>Tu turno | Shiftify</title>
-  <link rel="stylesheet" href="assets/css/tokens.css?v=3">
-  <link rel="stylesheet" href="assets/css/styles.css?v=3">
+  <title><?= $empresa ? "Turno en " . htmlspecialchars($empresa["nombre"]) : "Tu turno" ?> | Shiftify</title>
+  <link rel="stylesheet" href="assets/css/tokens.css?v=4">
+  <link rel="stylesheet" href="assets/css/styles.css?v=4">
 </head>
 <body class="pagina-turno">
   <main class="turno">
     <article class="turno__tarjeta">
       <img class="marca__imagen" src="assets/img/shiftify-logo.png" alt="Shiftify">
+
+      <?php if ($empresa): ?>
+        <!-- En todas las pantallas: la persona siempre sabe en qué negocio está su turno -->
+        <p class="turno__negocio"><span>Estás en la fila de</span> <strong><?= htmlspecialchars($empresa["nombre"]) ?></strong></p>
+      <?php endif; ?>
 
       <?php if (!$empresa): ?>
         <h1>No encontramos este negocio</h1>
@@ -89,7 +94,7 @@ $conexion->close();
 
       <?php elseif ($mostrarFormulario): ?>
         <h1>Pide tu turno</h1>
-        <p class="turno__nota">Fila de <strong><?= htmlspecialchars($empresa["nombre"]) ?></strong>. Sin filas ni papeles: espera donde quieras y sigue la fila desde aquí.</p>
+        <p class="turno__nota">Sin filas ni papeles: espera donde quieras y sigue la fila desde aquí.</p>
 
         <?php if ($error): ?>
           <p class="app-aviso app-aviso--error" role="alert"><?= htmlspecialchars($error) ?></p>
@@ -111,7 +116,7 @@ $conexion->close();
           <div><strong><?= $turno["antes"] ?></strong><span><?= $turno["antes"] == 1 ? "persona antes" : "personas antes" ?></span></div>
           <div><strong>~<?= $minutos ?></strong><span>minutos de espera</span></div>
         </div>
-        <p class="turno__nota">Fila de <?= htmlspecialchars($empresa["nombre"]) ?>. Esta página se actualiza sola, no la cierres.</p>
+        <p class="turno__nota">Esta página se actualiza sola, no la cierres.</p>
 
       <?php elseif ($turno["estado"] === "atendiendo"): ?>
         <h1>¡Es tu turno!</h1>

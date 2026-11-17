@@ -80,8 +80,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   <meta name="theme-color" content="#0F172A">
   <meta name="description" content="Registra tu negocio en Shiftify.">
   <title>Registra tu negocio | Shiftify</title>
-  <link rel="stylesheet" href="assets/css/tokens.css?v=3">
-  <link rel="stylesheet" href="assets/css/styles.css?v=3">
+  <link rel="stylesheet" href="assets/css/tokens.css?v=4">
+  <link rel="stylesheet" href="assets/css/styles.css?v=4">
 </head>
 <body class="pagina-login">
   <a class="salto" href="#acceso">Saltar al registro</a>

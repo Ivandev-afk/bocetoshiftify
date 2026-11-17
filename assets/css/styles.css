@@ -1527,6 +1527,30 @@ input:focus-visible {
   margin-inline: auto;
 }
 
+/* Negocio de la fila: visible en todas las pantallas del turno */
+.turno__negocio {
+  display: grid;
+  gap: 0.15rem;
+  margin-top: var(--e-4);
+  padding: var(--e-3) var(--e-4);
+  border: 1px solid var(--borde);
+  border-radius: 12px;
+  background: var(--superficie-base);
+}
+
+.turno__negocio span {
+  color: var(--contenido-suave);
+  font-size: var(--texto-sm);
+}
+
+.turno__negocio strong {
+  color: var(--contenido-fuerte);
+  font-size: var(--texto-lg);
+  font-weight: var(--peso-fuerte);
+  line-height: var(--alto-linea-titulo);
+  overflow-wrap: anywhere;
+}
+
 .turno__tarjeta h1 {
   margin-top: var(--e-4);
   font-size: var(--texto-xl);

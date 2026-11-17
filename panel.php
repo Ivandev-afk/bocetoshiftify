@@ -36,8 +36,8 @@ $paginaActual = "panel";
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0F172A">
   <title>Panel de atención | Shiftify</title>
-  <link rel="stylesheet" href="assets/css/tokens.css?v=3">
-  <link rel="stylesheet" href="assets/css/styles.css?v=3">
+  <link rel="stylesheet" href="assets/css/tokens.css?v=4">
+  <link rel="stylesheet" href="assets/css/styles.css?v=4">
 </head>
 <body class="pagina-panel">
   <a class="salto" href="#contenido">Saltar al contenido</a>
