@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0F172A">
+  <title>Equipo | Shiftify</title>
+  <link rel="stylesheet" href="../assets/css/tokens.css?v=6">
+  <link rel="stylesheet" href="../assets/css/styles.css?v=6">
+</head>
+<body class="pagina-panel">
+  <p class="maqueta-aviso">Maqueta con datos de ejemplo · <a href="index.html">Ver todas las pantallas</a></p>
+  <a class="salto" href="#contenido">Saltar al contenido</a>
+
+  <header class="barra">
+  <div class="contenedor barra__interior">
+    <a class="marca" href="../index.html" aria-label="Shiftify, inicio">
+      <img class="marca__imagen" src="../assets/img/shiftify-logo.png" alt="Shiftify">
+    </a>
+
+    <div class="barra__acciones">
+      <span class="app-usuario">Hola, <strong>Cecilia Gómez</strong> · Salón Doña Cecilia</span>
+      <a class="boton boton--claro boton--pequeno" href="login.html">Cerrar sesión</a>
+    </div>
+  </div>
+</header>
+
+<nav class="contenedor app-pestanas" aria-label="Secciones del panel">
+      <a href="panel.html">Fila de atención</a>
+      <a href="equipo.html" aria-current="page">Equipo</a>
+    <a href="turno-pedir.html" target="_blank" rel="noopener">Vista del cliente <span aria-hidden="true">↗</span></a>
+</nav>
+
+  <main class="contenedor app" id="contenido">
+    <div class="app-cabecera">
+      <p class="sobrelinea">Equipo</p>
+      <h1>Cuentas de acceso</h1>
+    </div>
+
+          <p class="app-aviso" role="status">Cuenta creada para Marta Lizcano. Ya puede iniciar sesión con marta@salon.co.</p>
+
+    <div class="app-columnas">
+      <section class="app-tarjeta" aria-labelledby="nuevo-titulo">
+        <h2 id="nuevo-titulo">Nuevo miembro</h2>
+        <form class="app-formulario app-formulario--apilado" action="equipo.html" method="get">
+          <label for="nombre">Nombre</label>
+          <input id="nombre" type="text" maxlength="100" autocomplete="off" value="">
+
+          <label for="correo">Correo electrónico</label>
+          <input id="correo" type="email" maxlength="150" autocomplete="off" placeholder="nombre@negocio.com" value="">
+
+          <label for="contrasena">Contraseña</label>
+          <input id="contrasena" type="password" autocomplete="new-password" placeholder="Mínimo 8 caracteres">
+
+          <label for="confirmar">Repite la contraseña</label>
+          <input id="confirmar" type="password" autocomplete="new-password">
+
+          <button class="boton" type="submit">Crear cuenta</button>
+        </form>
+      </section>
+
+      <section class="app-tarjeta" aria-labelledby="equipo-titulo">
+        <div class="app-tarjeta__titulo">
+          <h2 id="equipo-titulo">Equipo</h2>
+          <span class="app-contador">3</span>
+        </div>
+
+        <ul class="app-fila">
+                      <li class="app-miembro">
+              <span class="app-turno__persona">
+                <i aria-hidden="true">AR</i>
+                <span>
+                  <strong>Andrés Rojas</strong>
+                  <small>andres@salon.co</small>
+                </span>
+              </span>
+              <span class="app-turno__tiempo">Desde 23/11/2026</span>
+            </li>
+                      <li class="app-miembro">
+              <span class="app-turno__persona">
+                <i aria-hidden="true">CG</i>
+                <span>
+                  <strong>Cecilia Gómez (tú)</strong>
+                  <small>cecilia@salon.co</small>
+                </span>
+              </span>
+              <span class="app-turno__tiempo">Desde 23/11/2026</span>
+            </li>
+                      <li class="app-miembro">
+              <span class="app-turno__persona">
+                <i aria-hidden="true">ML</i>
+                <span>
+                  <strong>Marta Lizcano</strong>
+                  <small>marta@salon.co</small>
+                </span>
+              </span>
+              <span class="app-turno__tiempo">Desde 23/11/2026</span>
+            </li>
+                  </ul>
+      </section>
+    </div>
+  </main>
+</body>
+</html>

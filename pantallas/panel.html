@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0F172A">
+  <title>Panel de atención | Shiftify</title>
+  <link rel="stylesheet" href="../assets/css/tokens.css?v=6">
+  <link rel="stylesheet" href="../assets/css/styles.css?v=6">
+</head>
+<body class="pagina-panel">
+  <p class="maqueta-aviso">Maqueta con datos de ejemplo · <a href="index.html">Ver todas las pantallas</a></p>
+  <a class="salto" href="#contenido">Saltar al contenido</a>
+
+  <header class="barra">
+  <div class="contenedor barra__interior">
+    <a class="marca" href="../index.html" aria-label="Shiftify, inicio">
+      <img class="marca__imagen" src="../assets/img/shiftify-logo.png" alt="Shiftify">
+    </a>
+
+    <div class="barra__acciones">
+      <span class="app-usuario">Hola, <strong>Cecilia Gómez</strong> · Salón Doña Cecilia</span>
+      <a class="boton boton--claro boton--pequeno" href="login.html">Cerrar sesión</a>
+    </div>
+  </div>
+</header>
+
+<nav class="contenedor app-pestanas" aria-label="Secciones del panel">
+      <a href="panel.html" aria-current="page">Fila de atención</a>
+      <a href="equipo.html">Equipo</a>
+    <a href="turno-pedir.html" target="_blank" rel="noopener">Vista del cliente <span aria-hidden="true">↗</span></a>
+</nav>
+
+  <main class="contenedor app" id="contenido">
+    <div class="app-cabecera">
+      <p class="sobrelinea">Panel de atención</p>
+      <h1>Fila de hoy <span>23/11/2026</span></h1>
+    </div>
+
+          <p class="app-aviso" role="status">Caja 1 llama a A-004 · Valentina Ruiz.</p>
+
+    <section class="app-metricas" aria-label="Resumen de la fila">
+      <div class="app-metrica app-metrica--principal">
+        <span>Personas esperando</span>
+        <strong>03</strong>
+      </div>
+      <div class="app-metrica">
+        <span>En atención</span>
+        <strong>02</strong>
+      </div>
+      <div class="app-metrica">
+        <span>Atendidos hoy</span>
+        <strong>02</strong>
+      </div>
+      <div class="app-metrica">
+        <span>Espera estimada</span>
+        <strong>16<small> min</small></strong>
+      </div>
+    </section>
+
+    <section class="app-cajas" aria-labelledby="cajas-titulo">
+      <div class="app-cajas__cabecera">
+        <h2 id="cajas-titulo">Cajas</h2>
+        <p class="app-nota">
+                      Atiendes en <strong>Caja 1</strong>. Cada caja llama a una persona a la vez y nunca a la misma que otra.
+                  </p>
+      </div>
+
+      <div class="app-cajas__grilla">
+                  <article class="app-caja app-caja--mia" aria-labelledby="caja-5">
+            <header class="app-caja__cabecera">
+              <h3 id="caja-5">Caja 1</h3>
+              <span class="app-caja__estado">Tu caja</span>
+            </header>
+            <p class="app-caja__asesor">Cecilia Gómez</p>
+
+                          <p class="app-actual__codigo">A-004</p>
+              <p class="app-actual__nombre">Valentina Ruiz</p>
+              <p class="app-nota">Llamado a las 07:14</p>
+
+            <p class="app-caja__pie">1 atendido hoy</p>
+
+                          <div class="app-acciones">
+                <form action="panel.html" method="get">
+                  <button class="boton boton--pequeno" type="submit">Llamar siguiente <span aria-hidden="true">→</span></button>
+                </form>
+                                  <form action="panel.html" method="get">
+                    <button class="boton boton--claro boton--pequeno" type="submit">Finalizar</button>
+                  </form>
+                              </div>
+                      </article>
+                  <article class="app-caja" aria-labelledby="caja-6">
+            <header class="app-caja__cabecera">
+              <h3 id="caja-6">Caja 2</h3>
+              <span class="app-caja__estado">Ocupada</span>
+            </header>
+            <p class="app-caja__asesor">Andrés Rojas</p>
+
+                          <p class="app-actual__codigo">A-003</p>
+              <p class="app-actual__nombre">Sofía Herrera</p>
+              <p class="app-nota">Llamado a las 07:14</p>
+
+            <p class="app-caja__pie">1 atendido hoy</p>
+
+                      </article>
+                  <article class="app-caja app-caja--libre" aria-labelledby="caja-7">
+            <header class="app-caja__cabecera">
+              <h3 id="caja-7">Caja 3</h3>
+              <span class="app-caja__estado">Libre</span>
+            </header>
+            <p class="app-caja__asesor">Sin asesor</p>
+
+                          <p class="app-caja__vacia">Cerrada</p>
+
+            <p class="app-caja__pie">0 atendidos hoy</p>
+
+                      </article>
+                  <article class="app-caja app-caja--libre" aria-labelledby="caja-8">
+            <header class="app-caja__cabecera">
+              <h3 id="caja-8">Caja 4</h3>
+              <span class="app-caja__estado">Libre</span>
+            </header>
+            <p class="app-caja__asesor">Sin asesor</p>
+
+                          <p class="app-caja__vacia">Cerrada</p>
+
+            <p class="app-caja__pie">0 atendidos hoy</p>
+
+                      </article>
+              </div>
+    </section>
+
+    <div class="app-columnas">
+      <div class="app-columna">
+        <section class="app-tarjeta" aria-labelledby="nuevo-titulo">
+          <h2 id="nuevo-titulo">Nuevo turno</h2>
+          <form class="app-formulario" action="panel.html" method="get">
+            <label for="nombre">Nombre de la persona</label>
+            <div class="app-formulario__fila">
+              <input id="nombre" type="text" maxlength="100" placeholder="Ej. Laura Castro">
+              <button class="boton" type="submit">Dar turno</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="app-tarjeta app-qr" aria-labelledby="qr-titulo">
+          <h2 id="qr-titulo">QR de tu fila</h2>
+          <p class="app-nota">Imprímelo y ponlo en la entrada: quien lo escanee entra a la fila de Salón Doña Cecilia.</p>
+          <img src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&amp;margin=8&amp;data=https%3A%2F%2Fivandev-afk.github.io%2Fbocetoshiftify%2Fpantallas%2Fturno-pedir.html" width="200" height="200" alt="Código QR de la fila de Salón Doña Cecilia">
+        </section>
+      </div>
+
+      <section class="app-tarjeta" aria-labelledby="fila-titulo">
+        <div class="app-tarjeta__titulo">
+          <h2 id="fila-titulo">Siguiente en fila</h2>
+          <span class="app-contador">3</span>
+        </div>
+
+                  <ol class="app-fila">
+                          <li class="app-turno">
+                <span class="app-turno__codigo">A-005</span>
+                <span class="app-turno__persona"><i aria-hidden="true">DM</i> Daniel Mora</span>
+                <span class="app-turno__tiempo">07:14 · ~8 min</span>
+              </li>
+                          <li class="app-turno">
+                <span class="app-turno__codigo">A-006</span>
+                <span class="app-turno__persona"><i aria-hidden="true">PR</i> Paula Rincón</span>
+                <span class="app-turno__tiempo">07:14 · ~8 min</span>
+              </li>
+                          <li class="app-turno">
+                <span class="app-turno__codigo">A-007</span>
+                <span class="app-turno__persona"><i aria-hidden="true">TV</i> Tomás Vega</span>
+                <span class="app-turno__tiempo">07:14 · ~16 min</span>
+              </li>
+                      </ol>
+              </section>
+    </div>
+  </main>
+</body>
+</html>

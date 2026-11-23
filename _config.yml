@@ -1,0 +1,15 @@
+# Configuración de GitHub Pages (Jekyll).
+#
+# Pages solo sirve archivos estáticos: el PHP no se ejecuta ahí. Sin esta
+# lista, abrir login.php descargaba su código fuente. Ahora esas direcciones
+# muestran 404.html, que explica por qué y lleva a las maquetas de pantallas/.
+# En XAMPP o en el hosting este archivo no se usa.
+exclude:
+  - "*.php"
+  - "xml_proyecto/*.php"
+  - includes
+  - database
+  - pruebas
+  - publicar.ps1
+  - README.md
+  - Dockerfile
