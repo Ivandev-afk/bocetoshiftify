@@ -1201,7 +1201,7 @@ input:focus-visible {
 
 .app-metricas {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: var(--e-4);
   margin-top: var(--e-5);
 }
@@ -1246,6 +1246,151 @@ input:focus-visible {
   font-size: var(--texto-sm);
   font-weight: var(--peso-semi);
   letter-spacing: 0;
+}
+
+/* Cajas: una tarjeta por ventanilla, 4 en fila en pantallas anchas */
+.app-cajas {
+  margin-top: var(--e-5);
+}
+
+.app-cajas__cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--e-2) var(--e-4);
+}
+
+.app-cajas__cabecera h2 {
+  font-size: var(--texto-lg);
+  font-weight: var(--peso-semi);
+}
+
+.app-cajas__grilla {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--e-4);
+  margin-top: var(--e-3);
+}
+
+.app-caja {
+  display: flex;
+  flex-direction: column;
+  padding: var(--e-4) var(--e-5);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-lg);
+  background: var(--superficie-elevada);
+  box-shadow: var(--sombra-sm);
+}
+
+.app-caja--mia {
+  border-color: var(--acento);
+  box-shadow: 0 0 0 1px var(--acento), var(--sombra-md);
+}
+
+.app-caja--libre {
+  border-style: dashed;
+  background: var(--superficie-base);
+  box-shadow: none;
+}
+
+.app-caja__cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--e-2);
+}
+
+.app-caja__cabecera h3 {
+  font-size: var(--texto-md);
+  font-weight: var(--peso-fuerte);
+}
+
+.app-caja__estado {
+  padding: 0.1rem 0.6rem;
+  border-radius: var(--radio-full);
+  background: color-mix(in srgb, var(--dato-positivo) 12%, var(--superficie-elevada));
+  color: var(--dato-positivo);
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-semi);
+}
+
+.app-caja--mia .app-caja__estado {
+  background: var(--acento-suave);
+  color: var(--acento);
+}
+
+.app-caja--libre .app-caja__estado {
+  background: transparent;
+  color: var(--contenido-suave);
+  box-shadow: inset 0 0 0 1px var(--borde);
+}
+
+.app-caja__asesor {
+  margin-top: var(--e-1);
+  overflow: hidden;
+  color: var(--contenido-medio);
+  font-size: var(--texto-sm);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-caja__vacia {
+  margin-top: var(--e-4);
+  color: var(--contenido-suave);
+  font-size: var(--texto-sm);
+}
+
+.app-caja .app-actual__codigo {
+  font-size: var(--texto-2xl);
+}
+
+.app-caja .app-actual__nombre {
+  overflow: hidden;
+  font-size: var(--texto-md);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-caja__pie {
+  margin-top: auto;
+  padding-top: var(--e-3);
+  color: var(--contenido-suave);
+  font-size: var(--texto-xs);
+}
+
+.app-caja .app-acciones {
+  margin-top: var(--e-3);
+  gap: var(--e-2);
+}
+
+@media (max-width: 1100px) {
+  .app-cajas__grilla {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .app-cajas__grilla {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Botón de texto para acciones secundarias del cliente (cancelar el turno) */
+.turno__cancelar {
+  margin-top: var(--e-4);
+}
+
+.turno__cancelar button {
+  border: 0;
+  background: none;
+  color: var(--dato-negativo);
+  font: inherit;
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
 }
 
 .app-columnas,

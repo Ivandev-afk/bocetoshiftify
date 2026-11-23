@@ -5,7 +5,7 @@ Cada regla tiene una prueba automática en
 [pruebas/reglas_negocio.php](../pruebas/reglas_negocio.php) que la recorre
 contra el sistema real (servidor PHP + MySQL), como lo haría una persona.
 
-**Último resultado: 26 de 26 reglas se cumplen** →
+**Último resultado: 34 de 34 reglas se cumplen** →
 [reglas-resultado.md](reglas-resultado.md).
 
 ---
@@ -23,7 +23,7 @@ C:\xampp\php\php.exe pruebas\reglas_negocio.php
 ```
 
 El script crea la base `shiftify_pruebas` desde
-[database/shiftify.sql](../database/shiftify.sql), recorre las 26 reglas,
+[database/shiftify.sql](../database/shiftify.sql), recorre las 34 reglas,
 borra la base y escribe [reglas-resultado.md](reglas-resultado.md). Antes de
 empezar comprueba que el servidor esté conectado a la base de prueba; si no lo
 está, se detiene sin tocar ningún dato.
@@ -48,7 +48,7 @@ está, se detiene sin tocar ningún dato.
 | RN-07 | Los turnos se numeran por negocio: cada uno empieza en A-001 y sigue sin saltos. | El código del turno es lo que la persona escucha al ser llamada. | `crearTurno()` en [includes/funciones.php](../includes/funciones.php) |
 | RN-08 | La base de datos rechaza un número repetido dentro del mismo negocio. | Segunda barrera: aunque el código fallara, nunca habría dos A-004. | `UNIQUE (empresa_id, numero)` en [database/shiftify.sql](../database/shiftify.sql) |
 | RN-09 | El nombre es obligatorio y tiene como máximo 100 caracteres, tanto en el panel como desde el QR. | Es lo único que identifica a la persona en la fila. | [turnos.php](../turnos.php), [turno.php](../turno.php) |
-| RN-10 | Desde el QR, el cliente ve su código, cuántas personas tiene antes, su espera y el nombre del negocio, y la página se actualiza sola. | Es la promesa de Shiftify: esperar donde quieras sabiendo cuánto falta. | [turno.php](../turno.php) |
+| RN-10 | Desde el QR, el cliente ve su código, cuántas personas tiene antes, su espera y el nombre del negocio, y la página se actualiza sola. La espera se reparte entre las cajas abiertas. | Es la promesa de Shiftify: esperar donde quieras sabiendo cuánto falta. | [turno.php](../turno.php) |
 | RN-11 | Cada persona tiene un solo turno activo por negocio. | Evita que alguien acapare la fila pidiendo varios turnos. | [turno.php](../turno.php) |
 | RN-12 | La misma persona puede estar a la vez en la fila de dos negocios distintos. | Las filas de cada negocio son independientes. | `$_SESSION["mis_turnos"]` en [turno.php](../turno.php) |
 
@@ -57,14 +57,27 @@ está, se detiene sin tocar ningún dato.
 | Regla | Qué se exige | Por qué | Dónde |
 |---|---|---|---|
 | RN-13 | «Llamar siguiente» llama al turno más antiguo que espera. | Orden de llegada: nadie se salta la fila. | [turnos.php](../turnos.php) |
-| RN-14 | Solo hay un turno en atención: llamar al siguiente cierra el actual y guarda su hora de fin. | Una ventanilla atiende a una persona a la vez. Los dos cambios van en una transacción. | [turnos.php](../turnos.php) |
+| RN-14 | Cada caja atiende a una persona a la vez: llamar al siguiente cierra la atención de esa caja y guarda su hora de fin. | Un asesor atiende a una persona a la vez. Los dos cambios van en una transacción. | [turnos.php](../turnos.php) |
 | RN-15 | Un negocio nunca ve ni mueve la fila o el equipo de otro. | Todos comparten la misma base de datos. | `WHERE empresa_id = ?` en [panel.php](../panel.php), [turnos.php](../turnos.php), [usuarios.php](../usuarios.php) |
-| RN-16 | El cliente ve cuándo es «el siguiente», cuándo es su turno y cuándo terminó su atención; al terminar, la página deja de recargarse. | La persona no tiene que preguntar en la ventanilla. | [turno.php](../turno.php) |
+| RN-16 | El cliente ve cuándo es «el siguiente», cuándo es su turno y a qué caja acercarse, y cuándo terminó su atención; al terminar, la página deja de recargarse. | La persona no tiene que preguntar en la ventanilla. | [turno.php](../turno.php) |
 | RN-17 | «Finalizar» cierra la atención sin llamar a nadie más. | Para pausar la atención sin dejar a alguien llamado. | [turnos.php](../turnos.php) |
 | RN-18 | Con la fila vacía, «Llamar siguiente» está desactivado y avisa que no hay nadie. | Evita llamar a un turno que no existe. | [panel.php](../panel.php), [turnos.php](../turnos.php) |
-| RN-19 | La espera estimada usa la duración media de las atenciones de hoy (5 min si aún no hay datos). | Una estimación fija se desvía en los negocios lentos o rápidos. | `minutosPorTurno()` en [includes/funciones.php](../includes/funciones.php) |
+| RN-19 | La espera estimada usa la duración media de las atenciones que empezaron hoy (5 min si aún no hay datos), dividida entre las cajas abiertas. | Una estimación fija se desvía en los negocios lentos o rápidos. | `minutosPorTurno()` en [includes/funciones.php](../includes/funciones.php) |
 | RN-20 | Después de ser atendido, el cliente puede pedir un turno nuevo, que recibe el número siguiente. | Una misma persona puede volver el mismo día. | [turno.php](../turno.php) |
 | RN-21 | Un turno que quedó esperando de un día anterior no entra en la fila de hoy, y su cliente puede pedir uno nuevo. | Quien no fue atendido ayer ya se fue: no puede quedar primero en la fila de hoy. | [panel.php](../panel.php), [turnos.php](../turnos.php), [turno.php](../turno.php) |
+
+## Cajas y varios asesores
+
+| Regla | Qué se exige | Por qué | Dónde |
+|---|---|---|---|
+| RN-27 | Cada negocio nace con 4 cajas libres, y el panel las muestra. | Varios asesores atienden la misma fila a la vez. | `crearCajas()`, [registro.php](../registro.php), [panel.php](../panel.php) |
+| RN-28 | Un asesor atiende en una sola caja, y cada caja tiene un solo asesor. | Nadie puede acaparar cajas ni pisar la de otro. La base lo exige también con `UNIQUE (usuario_id)`. | [turnos.php](../turnos.php), [database/shiftify.sql](../database/shiftify.sql) |
+| RN-29 | Solo quien tomó una caja puede llamar o finalizar desde ella. | Cada llamado tiene un responsable. | [turnos.php](../turnos.php) |
+| RN-30 | Varias cajas atienden a la vez, en orden de llegada, y nunca llaman a la misma persona. | Si dos asesores pulsan «Llamar siguiente» al mismo tiempo, cada uno recibe un turno distinto: la acción bloquea la empresa mientras elige. | [turnos.php](../turnos.php) |
+| RN-31 | Un asesor no puede dejar su caja con alguien en atención. | La persona llamada no queda abandonada en una caja vacía. | [turnos.php](../turnos.php) |
+| RN-32 | Cerrar sesión libera la caja del asesor y cierra su atención. | Una caja no queda tomada por alguien que ya se fue. | [salir.php](../salir.php) |
+| RN-33 | El cliente puede cancelar su turno mientras espera, y después pedir otro; si ya lo llamaron, no se cancela. | Quien se va libera su lugar, y la fila no espera a nadie que no vendrá. | [turno.php](../turno.php) |
+| RN-34 | La espera no se dispara por una atención que quedó abierta desde otro día: solo cuentan las de hoy, con un tope de 60 min cada una. | Un turno que alguien olvidó finalizar mostraba ~36 940 minutos de espera. | `minutosPorTurno()` en [includes/funciones.php](../includes/funciones.php) |
 
 ## Equipo
 

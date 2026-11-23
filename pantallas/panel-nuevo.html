@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0F172A">
   <title>Panel de atención | Shiftify</title>
-  <link rel="stylesheet" href="../assets/css/tokens.css?v=5">
-  <link rel="stylesheet" href="../assets/css/styles.css?v=5">
+  <link rel="stylesheet" href="../assets/css/tokens.css?v=6">
+  <link rel="stylesheet" href="../assets/css/styles.css?v=6">
 </head>
 <body class="pagina-panel">
   <p class="maqueta-aviso">Maqueta con datos de ejemplo · <a href="index.html">Ver todas las pantallas</a></p>
@@ -34,7 +34,7 @@
   <main class="contenedor app" id="contenido">
     <div class="app-cabecera">
       <p class="sobrelinea">Panel de atención</p>
-      <h1>Fila de hoy <span>17/11/2026</span></h1>
+      <h1>Fila de hoy <span>23/11/2026</span></h1>
     </div>
 
           <p class="app-aviso" role="status">¡Listo! Salón Doña Cecilia ya tiene su fila. Imprime el QR de abajo y ponlo en la entrada.</p>
@@ -42,6 +42,10 @@
     <section class="app-metricas" aria-label="Resumen de la fila">
       <div class="app-metrica app-metrica--principal">
         <span>Personas esperando</span>
+        <strong>00</strong>
+      </div>
+      <div class="app-metrica">
+        <span>En atención</span>
         <strong>00</strong>
       </div>
       <div class="app-metrica">
@@ -54,20 +58,88 @@
       </div>
     </section>
 
+    <section class="app-cajas" aria-labelledby="cajas-titulo">
+      <div class="app-cajas__cabecera">
+        <h2 id="cajas-titulo">Cajas</h2>
+        <p class="app-nota">
+                      Toma una caja libre para empezar a llamar turnos. Cada asesor atiende en una sola caja.
+                  </p>
+      </div>
+
+      <div class="app-cajas__grilla">
+                  <article class="app-caja app-caja--libre" aria-labelledby="caja-5">
+            <header class="app-caja__cabecera">
+              <h3 id="caja-5">Caja 1</h3>
+              <span class="app-caja__estado">Libre</span>
+            </header>
+            <p class="app-caja__asesor">Sin asesor</p>
+
+                          <p class="app-caja__vacia">Cerrada</p>
+
+            <p class="app-caja__pie">0 atendidos hoy</p>
+
+                          <div class="app-acciones">
+                <form action="panel.html" method="get">
+                  <button class="boton boton--claro boton--pequeno" type="submit">Tomar esta caja</button>
+                </form>
+              </div>
+                      </article>
+                  <article class="app-caja app-caja--libre" aria-labelledby="caja-6">
+            <header class="app-caja__cabecera">
+              <h3 id="caja-6">Caja 2</h3>
+              <span class="app-caja__estado">Libre</span>
+            </header>
+            <p class="app-caja__asesor">Sin asesor</p>
+
+                          <p class="app-caja__vacia">Cerrada</p>
+
+            <p class="app-caja__pie">0 atendidos hoy</p>
+
+                          <div class="app-acciones">
+                <form action="panel.html" method="get">
+                  <button class="boton boton--claro boton--pequeno" type="submit">Tomar esta caja</button>
+                </form>
+              </div>
+                      </article>
+                  <article class="app-caja app-caja--libre" aria-labelledby="caja-7">
+            <header class="app-caja__cabecera">
+              <h3 id="caja-7">Caja 3</h3>
+              <span class="app-caja__estado">Libre</span>
+            </header>
+            <p class="app-caja__asesor">Sin asesor</p>
+
+                          <p class="app-caja__vacia">Cerrada</p>
+
+            <p class="app-caja__pie">0 atendidos hoy</p>
+
+                          <div class="app-acciones">
+                <form action="panel.html" method="get">
+                  <button class="boton boton--claro boton--pequeno" type="submit">Tomar esta caja</button>
+                </form>
+              </div>
+                      </article>
+                  <article class="app-caja app-caja--libre" aria-labelledby="caja-8">
+            <header class="app-caja__cabecera">
+              <h3 id="caja-8">Caja 4</h3>
+              <span class="app-caja__estado">Libre</span>
+            </header>
+            <p class="app-caja__asesor">Sin asesor</p>
+
+                          <p class="app-caja__vacia">Cerrada</p>
+
+            <p class="app-caja__pie">0 atendidos hoy</p>
+
+                          <div class="app-acciones">
+                <form action="panel.html" method="get">
+                  <button class="boton boton--claro boton--pequeno" type="submit">Tomar esta caja</button>
+                </form>
+              </div>
+                      </article>
+              </div>
+    </section>
+
     <div class="app-columnas">
       <div class="app-columna">
-        <section class="app-tarjeta" aria-labelledby="actual-titulo">
-          <h2 id="actual-titulo">Atendiendo ahora</h2>
-
-                      <p class="app-nota app-vacio">Nadie en atención.</p>
-
-          <div class="app-acciones">
-            <form action="panel.html" method="get">
-              <button class="boton" type="submit" disabled>Llamar siguiente <span aria-hidden="true">→</span></button>
-            </form>
-                      </div>
-        </section>
-
         <section class="app-tarjeta" aria-labelledby="nuevo-titulo">
           <h2 id="nuevo-titulo">Nuevo turno</h2>
           <form class="app-formulario" action="panel.html" method="get">

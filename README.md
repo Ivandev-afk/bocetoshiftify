@@ -23,7 +23,9 @@ El inicio de sesión usa PHP y MySQL, así que el proyecto se sirve con
 3. Crea la base de datos: abre `http://localhost/phpmyadmin`, pestaña **SQL**,
    pega el contenido de [database/shiftify.sql](database/shiftify.sql) y pulsa
    **Continuar**. Si ya tenías la base de antes, sin empresas, ejecuta
-   [database/multiempresa.sql](database/multiempresa.sql) una sola vez.
+   [database/multiempresa.sql](database/multiempresa.sql) una sola vez. Si tu
+   base es anterior a las cajas, ejecuta además
+   [database/cajas.sql](database/cajas.sql) una sola vez.
 4. Abre `http://localhost/proyecto-shiftify/`.
 
 Usuario de prueba: `admin@shiftify.co` / `Shiftify2026`.
@@ -42,7 +44,7 @@ datos de ejemplo. Los archivos PHP y de servidor no se publican
 
 ### Reglas de negocio y maquetas
 
-Las 26 reglas de negocio están en [docs/reglas-negocio.md](docs/reglas-negocio.md)
+Las 34 reglas de negocio están en [docs/reglas-negocio.md](docs/reglas-negocio.md)
 y se verifican de forma automática contra el sistema real. Con MySQL encendido:
 
 ```powershell
@@ -99,13 +101,14 @@ en A-001.
 ├── database/
 │   ├── shiftify.sql        Crea la base de datos, las tablas y el usuario de prueba.
 │   ├── multiempresa.sql    Pasa una base de antes a varias empresas.
+│   ├── cajas.sql           Agrega las 4 cajas y la cancelación a una base de antes.
 │   └── hosting.sql         Igual que shiftify.sql, para la base que crea el hosting.
 ├── publicar.ps1            Enlace público temporal (Cloudflare) para probar el QR desde cualquier red.
 ├── pantallas/              Maquetas estáticas de las pantallas operativas (se ven en GitHub Pages).
 │   ├── index.html          Galería: personal del negocio y cliente desde el QR, con sus reglas.
 │   └── *.html              Cada pantalla, generada desde el sistema real por maquetas.php.
 ├── pruebas/
-│   ├── reglas_negocio.php  Verifica las 26 reglas de negocio contra el sistema real.
+│   ├── reglas_negocio.php  Verifica las 34 reglas de negocio contra el sistema real.
 │   ├── maquetas.php        Genera pantallas/*.html recorriendo un día de atención.
 │   ├── servidor.ps1        Servidor de PHP conectado a la base de prueba.
 │   └── lib.php             Base de prueba y "navegador" con su cookie de sesión.

@@ -199,6 +199,17 @@ primero en la fila de hoy. Se corrigió. Resultado actual: **26 de 26**
 Esto también cierra la «prueba completa con MySQL encendido» que el informe de
 PHP y MySQL dejó pendiente el 9 de noviembre.
 
+**Cajas y varios asesores (23/11/2026).** El panel pasó de una sola
+ventanilla a 4 cajas por negocio. Cada asesor toma una caja y solo él la
+opera; la base impide que un asesor tenga dos (`UNIQUE (usuario_id)`), y
+«Llamar siguiente» bloquea la empresa mientras elige, así dos cajas nunca
+llaman a la misma persona. La espera estimada ahora se reparte entre las
+cajas abiertas. El cliente puede cancelar su turno mientras espera y pedir
+otro. Al probarlo con datos reales apareció una espera de ~36 940 minutos:
+una atención llamada el 4/11 y finalizada el 17/11 entraba en el promedio.
+Ahora solo cuentan las atenciones que empezaron hoy, con un tope de 60 min.
+Las reglas RN-27 a RN-34 cubren todo esto: **34 de 34**.
+
 ---
 
 ## Pendientes

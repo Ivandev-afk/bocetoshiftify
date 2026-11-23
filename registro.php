@@ -39,7 +39,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $slug = "$base-$n";
         }
 
-        // 4. Empresa y cuenta juntas: o se crean las dos, o ninguna
+        // 4. Empresa, cuenta y cajas juntas: o se crea todo, o nada
         $conexion->begin_transaction();
 
         $stmt = $conexion->prepare("INSERT INTO empresas (nombre, slug) VALUES (?, ?)");
@@ -54,6 +54,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $stmt->execute();
         $usuarioId = $stmt->insert_id;
         $stmt->close();
+
+        crearCajas($conexion, $empresaId);
 
         $conexion->commit();
 
@@ -80,8 +82,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   <meta name="theme-color" content="#0F172A">
   <meta name="description" content="Registra tu negocio en Shiftify.">
   <title>Registra tu negocio | Shiftify</title>
-  <link rel="stylesheet" href="assets/css/tokens.css?v=5">
-  <link rel="stylesheet" href="assets/css/styles.css?v=5">
+  <link rel="stylesheet" href="assets/css/tokens.css?v=6">
+  <link rel="stylesheet" href="assets/css/styles.css?v=6">
 </head>
 <body class="pagina-login">
   <a class="salto" href="#acceso">Saltar al registro</a>

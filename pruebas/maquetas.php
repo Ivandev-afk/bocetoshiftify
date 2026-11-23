@@ -34,6 +34,7 @@ function maqueta(string $html): string
 
     // La maqueta no se recarga sola
     $html = preg_replace('#\s*<!--[^>]*-->\s*<meta http-equiv="refresh"[^>]*>#', "", $html);
+    $html = preg_replace('#\s*<script>.*?</script>#s', "", $html);
 
     // Formularios: van a la pantalla que el sistema mostraría después, por GET y sin datos
     $html = preg_replace_callback('#<form\b([^>]*)>(.*?)</form>#s', function ($m) {
@@ -41,7 +42,8 @@ function maqueta(string $html): string
         preg_match('/name="accion" value="([^"]+)"/', $m[2], $tipo);
         $destino = match ([$accion[1] ?? "", $tipo[1] ?? ""]) {
             ["turno.php", "pedir"] => "turno-esperando.html",
-            ["turno.php", "nuevo"] => "turno-pedir.html",
+            ["turno.php", "nuevo"],
+            ["turno.php", "cancelar"] => "turno-pedir.html",
             ["registro.php", ""]   => "panel-nuevo.html",
             ["login.php", ""]      => "panel.html",
             ["usuarios.php", ""]   => "equipo.html",
@@ -100,7 +102,16 @@ try {
     $cecilia->post("usuarios.php", ["nombre" => "Andrés Rojas", "correo" => "andres@salon.co", "contrasena" => "Andres2026", "confirmar" => "Andres2026"]);
     guardar("equipo.html", $cecilia->enviar("usuarios.php", ["nombre" => "Marta Lizcano", "correo" => "marta@salon.co", "contrasena" => "Marta2026", "confirmar" => "Marta2026"]));
 
-    // 3. Llegan clientes: tres se anotan en el mostrador y una escanea el QR
+    // Id de la caja número $n del salón
+    $caja = fn(int $n) => (int) $db->query("SELECT c.id FROM cajas c JOIN empresas e ON e.id = c.empresa_id WHERE e.slug = 'salon-dona-cecilia' AND c.numero = $n")->fetch_row()[0];
+
+    // 3. Abren dos cajas: Cecilia en la 1 y Andrés en la 2
+    $cecilia->post("turnos.php", ["accion" => "tomar", "caja" => $caja(1)]);
+    $andres = new Navegador();
+    $andres->post("login.php", ["correo" => "andres@salon.co", "contrasena" => "Andres2026"]);
+    $andres->post("turnos.php", ["accion" => "tomar", "caja" => $caja(2)]);
+
+    // 4. Llegan clientes: tres se anotan en el mostrador y una escanea el QR
     foreach (["Laura Castro", "Mateo Díaz", "Sofía Herrera"] as $nombre) {
         $cecilia->post("turnos.php", ["accion" => "crear", "nombre" => $nombre]);
     }
@@ -108,24 +119,27 @@ try {
     guardar("turno-pedir.html", $valentina->get($salon));
     guardar("turno-esperando.html", $valentina->enviar($salon, ["accion" => "pedir", "nombre" => "Valentina Ruiz"]));
 
-    // 4. Atiende a los dos primeros (unos 8 minutos cada uno) y llama a Sofía
-    $cecilia->post("turnos.php", ["accion" => "siguiente"]);
-    $cecilia->post("turnos.php", ["accion" => "siguiente"]);
+    // 5. Las dos cajas atienden a los dos primeros (unos 8 minutos cada uno)
+    $cecilia->post("turnos.php", ["accion" => "siguiente", "caja" => $caja(1)]);
+    $andres->post("turnos.php", ["accion" => "siguiente", "caja" => $caja(2)]);
+    $cecilia->post("turnos.php", ["accion" => "finalizar", "caja" => $caja(1)]);
+    $andres->post("turnos.php", ["accion" => "finalizar", "caja" => $caja(2)]);
     $db->query("UPDATE turnos SET llamado = NOW() - INTERVAL 17 MINUTE, finalizado = NOW() - INTERVAL 9 MINUTE WHERE numero = 1");
     $db->query("UPDATE turnos SET llamado = NOW() - INTERVAL 9 MINUTE, finalizado = NOW() - INTERVAL 1 MINUTE WHERE numero = 2");
     foreach (["Daniel Mora", "Paula Rincón"] as $nombre) {
         $cecilia->post("turnos.php", ["accion" => "crear", "nombre" => $nombre]);
     }
     (new Navegador())->post($salon, ["accion" => "pedir", "nombre" => "Tomás Vega"]);
-    guardar("panel.html", $cecilia->enviar("turnos.php", ["accion" => "siguiente"]));
+    // Andrés llama a Sofía y Cecilia ve el panel con las dos cajas trabajando
+    $andres->post("turnos.php", ["accion" => "siguiente", "caja" => $caja(2)]);
+    guardar("panel.html", $cecilia->enviar("turnos.php", ["accion" => "siguiente", "caja" => $caja(1)]));
 
-    // 5. Le toca a Valentina, y después termina su atención
-    $cecilia->post("turnos.php", ["accion" => "siguiente"]);
+    // 6. Valentina ya fue llamada por la Caja 1; después termina su atención
     guardar("turno-ahora.html", $valentina->get($salon));
-    $cecilia->post("turnos.php", ["accion" => "finalizar"]);
+    $cecilia->post("turnos.php", ["accion" => "finalizar", "caja" => $caja(1)]);
     guardar("turno-fin.html", $valentina->get($salon));
 
-    // 6. Alguien escanea un QR que ya no existe
+    // 7. Alguien escanea un QR que ya no existe
     guardar("turno-no-existe.html", (new Navegador())->get("turno.php?e=negocio-cerrado"));
 } finally {
     borrarBasePrueba($db);

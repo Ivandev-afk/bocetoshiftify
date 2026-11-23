@@ -33,6 +33,7 @@ $registros = consultar($conexion, "
            TIMESTAMPDIFF(MINUTE, llamado, finalizado)              AS duracion
     FROM turnos
     WHERE empresa_id = ? AND DATE(creado) = CURDATE()
+      AND estado <> 'cancelado'   -- el DTD solo conoce esperando, atendiendo y atendido
     ORDER BY numero
 ", "i", $empresa['id'])->fetch_all(MYSQLI_ASSOC);
 

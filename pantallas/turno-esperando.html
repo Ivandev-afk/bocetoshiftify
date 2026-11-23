@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0F172A">
     <title>Turno en Salón Doña Cecilia | Shiftify</title>
-  <link rel="stylesheet" href="../assets/css/tokens.css?v=5">
-  <link rel="stylesheet" href="../assets/css/styles.css?v=5">
+  <link rel="stylesheet" href="../assets/css/tokens.css?v=6">
+  <link rel="stylesheet" href="../assets/css/styles.css?v=6">
 </head>
 <body class="pagina-turno">
   <p class="maqueta-aviso">Maqueta con datos de ejemplo · <a href="index.html">Ver todas las pantallas</a></p>
@@ -23,9 +23,14 @@
 
         <div class="turno__datos">
           <div><strong>3</strong><span>personas antes</span></div>
-          <div><strong>~20</strong><span>minutos de espera</span></div>
+          <div><strong>~10</strong><span>minutos de espera</span></div>
         </div>
         <p class="turno__nota">Esta página se actualiza sola, no la cierres.</p>
+
+        <!-- Para salir de la fila: libera el lugar y deja pedir un turno nuevo -->
+        <form class="turno__cancelar" action="turno-pedir.html" method="get" onsubmit="return confirm('¿Cancelar tu turno A-004? Perderás tu lugar en la fila.')">
+          <button type="submit">Cancelar mi turno</button>
+        </form>
 
           </article>
   </main>

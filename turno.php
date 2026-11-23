@@ -9,6 +9,10 @@ require "includes/funciones.php";
 $nombre = "";
 $error  = "";
 
+// Aviso de una sola vez (por ejemplo, después de cancelar)
+$avisoTurno = $_SESSION["turno_aviso"] ?? "";
+unset($_SESSION["turno_aviso"]);
+
 $empresa = empresaPorSlug($conexion, $_GET["e"] ?? "");
 $turno   = null;
 
@@ -20,17 +24,19 @@ function turnoDeLaSesion(mysqli $conexion, int $empresaId): ?array
     }
 
     $turno = consultar($conexion, "
-        SELECT t.numero, t.nombre, t.estado,
+        SELECT t.id, t.numero, t.nombre, t.estado, c.numero AS caja,
                t.estado = 'esperando' AND DATE(t.creado) < CURDATE() AS vencido,
                (SELECT COUNT(*) FROM turnos f
                 WHERE f.empresa_id = t.empresa_id AND f.estado = 'esperando'
                   AND DATE(f.creado) = CURDATE() AND f.numero < t.numero) AS antes
         FROM turnos t
+        LEFT JOIN cajas c ON c.id = t.caja_id
         WHERE t.id = ? AND t.empresa_id = ?
     ", "ii", $_SESSION["mis_turnos"][$empresaId], $empresaId)->fetch_assoc();
 
-    // Un turno que quedó esperando otro día ya no está en la fila: puede pedir uno nuevo
-    if (!$turno || $turno["vencido"]) {
+    // Un turno cancelado, o que quedó esperando otro día, ya no está en la fila:
+    // la persona puede pedir uno nuevo
+    if (!$turno || $turno["vencido"] || $turno["estado"] === "cancelado") {
         unset($_SESSION["mis_turnos"][$empresaId]);
         return null;
     }
@@ -61,10 +67,23 @@ if ($empresa) {
             unset($_SESSION["mis_turnos"][$empresaId]);
             header("Location: $esta");
             exit;
+        } elseif ($accion === "cancelar" && $turno && $turno["estado"] === "esperando") {
+            // Solo mientras espera: si ya lo llamaron, la caja lo está atendiendo.
+            // La condición va también en el UPDATE por si una caja lo llama en este instante.
+            consultar($conexion, "UPDATE turnos SET estado = 'cancelado', finalizado = NOW() WHERE id = ? AND estado = 'esperando'", "i", $turno["id"]);
+            unset($_SESSION["mis_turnos"][$empresaId]);
+            $_SESSION["turno_aviso"] = "Cancelaste el turno " . codigoTurno($turno["numero"]) . ". Puedes pedir uno nuevo cuando quieras.";
+            header("Location: $esta");
+            exit;
+        } elseif ($accion === "cancelar") {
+            // Ya lo llamaron: no se cancela, se muestra lo que hay
+            header("Location: $esta");
+            exit;
         }
     }
 
-    $minutos = $turno ? ($turno["antes"] + 1) * minutosPorTurno($conexion, $empresaId) : 0;
+    // Las cajas abiertas atienden en paralelo
+    $minutos = $turno ? minutosDeEspera($turno["antes"] + 1, minutosPorTurno($conexion, $empresaId), cajasAbiertas($conexion, $empresaId)) : 0;
 } else {
     // QR viejo o mal escrito: no sabemos a qué fila sumarlo
     http_response_code(404);
@@ -85,8 +104,8 @@ $conexion->close();
     <meta http-equiv="refresh" content="15">
   <?php endif; ?>
   <title><?= $empresa ? "Turno en " . htmlspecialchars($empresa["nombre"]) : "Tu turno" ?> | Shiftify</title>
-  <link rel="stylesheet" href="assets/css/tokens.css?v=5">
-  <link rel="stylesheet" href="assets/css/styles.css?v=5">
+  <link rel="stylesheet" href="assets/css/tokens.css?v=6">
+  <link rel="stylesheet" href="assets/css/styles.css?v=6">
 </head>
 <body class="pagina-turno">
   <main class="turno">
@@ -108,6 +127,8 @@ $conexion->close();
 
         <?php if ($error): ?>
           <p class="app-aviso app-aviso--error" role="alert"><?= htmlspecialchars($error) ?></p>
+        <?php elseif ($avisoTurno): ?>
+          <p class="app-aviso" role="status"><?= htmlspecialchars($avisoTurno) ?></p>
         <?php endif; ?>
 
         <form class="app-formulario app-formulario--apilado" action="<?= htmlspecialchars($esta) ?>" method="POST">
@@ -128,10 +149,16 @@ $conexion->close();
         </div>
         <p class="turno__nota">Esta página se actualiza sola, no la cierres.</p>
 
+        <!-- Para salir de la fila: libera el lugar y deja pedir un turno nuevo -->
+        <form class="turno__cancelar" action="<?= htmlspecialchars($esta) ?>" method="POST" onsubmit="return confirm('¿Cancelar tu turno <?= codigoTurno($turno["numero"]) ?>? Perderás tu lugar en la fila.')">
+          <input type="hidden" name="accion" value="cancelar">
+          <button type="submit">Cancelar mi turno</button>
+        </form>
+
       <?php elseif ($turno["estado"] === "atendiendo"): ?>
         <h1>¡Es tu turno!</h1>
         <p class="turno__codigo"><?= codigoTurno($turno["numero"]) ?></p>
-        <p class="turno__estado turno__estado--ahora">Acércate a la ventanilla</p>
+        <p class="turno__estado turno__estado--ahora">Acércate a la <?= $turno["caja"] ? nombreCaja($turno["caja"]) : "ventanilla" ?></p>
 
       <?php else: ?>
         <h1>¡Gracias, <?= htmlspecialchars($turno["nombre"]) ?>!</h1>
