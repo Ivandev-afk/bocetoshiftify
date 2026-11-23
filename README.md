@@ -32,14 +32,16 @@ Usuario de prueba: `admin@shiftify.co` / `Shiftify2026`.
 
 ### En KyraCloud (desde cualquier red)
 
-KyraCloud construye el [Dockerfile](Dockerfile) (PHP 8.2 + Apache, puerto 80)
-cada vez que se sube un cambio a `main`.
+KyraCloud monta el código del repo en `/app` y lo sirve con el
+[Dockerfile](Dockerfile) (PHP 8.2 + Apache, puerto 8080). Cada push a `main`
+sincroniza `/app` y reinicia; solo hay que reconstruir si cambia el Dockerfile.
 
 1. Crea una base MySQL en KyraCloud y ejecuta en ella
    [database/hosting.sql](database/hosting.sql). Si la base ya tenía las tablas
    de antes, ejecuta [database/cajas.sql](database/cajas.sql) sin la línea `USE`.
 2. Crea el servidor con **GitHub** → `Ivandev-afk/bocetoshiftify`, rama `main`,
-   carpeta raíz, puerto **80**.
+   carpeta raíz, puerto **8080**. En la pestaña **Dockerfile** del servidor
+   debe estar el de este repo (no el de nginx), y después **Reconstruir**.
 3. En **Configuración → Variables** pon `DB_HOST`, `DB_PORT`, `DB_USER`,
    `DB_PASSWORD` y `DB_NAME` con los datos de esa base, y reconstruye.
 
@@ -116,8 +118,7 @@ en A-001.
 │   ├── multiempresa.sql    Pasa una base de antes a varias empresas.
 │   ├── cajas.sql           Agrega las 4 cajas y la cancelación a una base de antes.
 │   └── hosting.sql         Igual que shiftify.sql, para la base que crea el hosting.
-├── Dockerfile              Imagen para KyraCloud: PHP 8.2 + Apache + mysqli.
-├── docker/                 Configuración de Apache que bloquea includes/, database/ y los .sql.
+├── Dockerfile              Imagen para KyraCloud: PHP 8.2 + Apache + mysqli, sirve /app en el 8080.
 ├── publicar.ps1            Enlace público temporal (Cloudflare) para probar el QR desde cualquier red.
 ├── pantallas/              Maquetas estáticas de las pantallas operativas (se ven en GitHub Pages).
 │   ├── index.html          Galería: personal del negocio y cliente desde el QR, con sus reglas.

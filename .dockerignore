@@ -1,8 +1,0 @@
-# No viajan al servidor:
-# las pruebas crean y borran bases de datos, y lo demás es solo para desarrollo
-.git
-.gitignore
-pruebas
-publicar.ps1
-_config.yml
-404.html

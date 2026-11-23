@@ -13,4 +13,3 @@ exclude:
   - publicar.ps1
   - README.md
   - Dockerfile
-  - docker
