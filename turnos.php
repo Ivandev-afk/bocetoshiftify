@@ -38,11 +38,14 @@ function atendiendoEn(mysqli $conexion, int $cajaId): ?array
 
 if ($accion === "crear") {
     $nombre = trim($_POST["nombre"] ?? "");
+    $cajaId = cajaElegida($conexion, $empresaId, (string) ($_POST["caja"] ?? ""));
 
     if ($nombre === "" || mb_strlen($nombre) > 100) {
         $_SESSION["error"] = "Escribe un nombre de hasta 100 caracteres.";
+    } elseif ($cajaId === false) {
+        $_SESSION["error"] = "Esa caja está cerrada. Elige una abierta o «la primera libre».";
     } else {
-        $turno = crearTurno($conexion, $empresaId, $nombre);
+        $turno = crearTurno($conexion, $empresaId, $nombre, $cajaId);
         $_SESSION["aviso"] = "Turno " . codigoTurno($turno["numero"]) . " creado para $nombre.";
     }
 } elseif (in_array($accion, ["tomar", "dejar", "siguiente", "finalizar"], true)) {
@@ -77,6 +80,9 @@ if ($accion === "crear") {
             $_SESSION["error"] = "Finaliza la atención antes de dejar " . nombreCaja($caja["numero"]) . ".";
         } else {
             consultar($conexion, "UPDATE cajas SET usuario_id = NULL WHERE id = ?", "i", $caja["id"]);
+            // Quien esperaba en esta caja no se queda atascado: pasa a «la primera libre»,
+            // sin perder su lugar (el orden es por número de turno)
+            consultar($conexion, "UPDATE turnos SET caja_id = NULL WHERE caja_id = ? AND estado = 'esperando'", "i", $caja["id"]);
             $_SESSION["aviso"] = "Dejaste " . nombreCaja($caja["numero"]) . ".";
         }
     } else {
@@ -86,8 +92,9 @@ if ($accion === "crear") {
         if ($accion === "finalizar") {
             $_SESSION["aviso"] = "Atención finalizada en " . nombreCaja($caja["numero"]) . ".";
         } else {
-            // 2. Llamar al primero de la fila de hoy y asignarlo a esta caja
-            $siguiente = consultar($conexion, "SELECT id, numero, nombre FROM turnos WHERE empresa_id = ? AND estado = 'esperando' AND DATE(creado) = CURDATE() ORDER BY numero LIMIT 1 FOR UPDATE", "i", $empresaId)->fetch_assoc();
+            // 2. Llamar al primero de hoy que puede atender esta caja: quien la eligió
+            //    o quien espera «la primera libre». Nunca a quien eligió otra caja.
+            $siguiente = consultar($conexion, "SELECT id, numero, nombre FROM turnos WHERE empresa_id = ? AND estado = 'esperando' AND DATE(creado) = CURDATE() AND (caja_id = ? OR caja_id IS NULL) ORDER BY numero LIMIT 1 FOR UPDATE", "ii", $empresaId, $caja["id"])->fetch_assoc();
 
             if ($siguiente) {
                 consultar($conexion, "UPDATE turnos SET estado = 'atendiendo', caja_id = ?, llamado = NOW() WHERE id = ?", "ii", $caja["id"], $siguiente["id"]);

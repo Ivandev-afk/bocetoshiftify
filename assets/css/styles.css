@@ -1494,6 +1494,19 @@ input:focus-visible {
   transition: border-color var(--transicion), box-shadow var(--transicion);
 }
 
+.app-formulario select {
+  width: 100%;
+  min-height: 50px;
+  margin-top: var(--e-2);
+  padding: 0.8rem 0.9rem;
+  border: 1px solid var(--borde-fuerte);
+  border-radius: var(--radio-md);
+  background: var(--superficie-elevada);
+  color: var(--contenido-fuerte);
+  font: inherit;
+  font-size: var(--texto-sm);
+}
+
 .app-formulario input:focus {
   border-color: var(--acento);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--acento) 12%, transparent);
@@ -1706,6 +1719,69 @@ input:focus-visible {
 .turno__tarjeta .app-formulario,
 .turno__tarjeta .app-aviso {
   text-align: left;
+}
+
+/* Elegir caja al pedir turno: una tarjeta por caja con su fila */
+.turno-cajas {
+  display: grid;
+  gap: var(--e-2);
+  margin: var(--e-5) 0 0;
+  padding: 0;
+  border: 0;
+}
+
+.turno-cajas legend {
+  margin-bottom: var(--e-2);
+  padding: 0;
+  font-weight: var(--peso-semi);
+}
+
+/* Doble clase: gana sobre .app-formulario label / input */
+.turno-cajas .turno-caja {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: var(--e-3);
+  align-items: center;
+  margin: 0;
+  padding: var(--e-3) var(--e-4);
+  border: 1px solid var(--borde);
+  border-radius: 12px;
+  background: var(--superficie-base);
+  color: inherit;
+  font-size: var(--texto-base, 1rem);
+  cursor: pointer;
+}
+
+.turno-cajas .turno-caja input {
+  grid-row: span 2;
+  width: 1.15rem;
+  min-height: 0;
+  height: 1.15rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  box-shadow: none;
+  accent-color: var(--acento);
+}
+
+.turno-caja__nombre {
+  color: var(--contenido-fuerte);
+  font-weight: var(--peso-semi);
+}
+
+.turno-caja__fila {
+  color: var(--contenido-suave);
+  font-size: var(--texto-sm);
+}
+
+.turno-caja:has(input:checked) {
+  border-color: var(--acento);
+  box-shadow: 0 0 0 1px var(--acento);
+}
+
+.turno-caja--cerrada {
+  cursor: not-allowed;
+  opacity: 0.55;
 }
 
 .turno__codigo {

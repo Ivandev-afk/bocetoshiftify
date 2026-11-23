@@ -15,7 +15,9 @@ $cajas = consultar($conexion, "
     SELECT c.id, c.numero, c.usuario_id, u.nombre AS asesor,
            t.numero AS turno, t.nombre, DATE_FORMAT(t.llamado, '%H:%i') AS hora,
            (SELECT COUNT(*) FROM turnos a
-            WHERE a.caja_id = c.id AND a.estado = 'atendido' AND DATE(a.finalizado) = CURDATE()) AS atendidos
+            WHERE a.caja_id = c.id AND a.estado = 'atendido' AND DATE(a.finalizado) = CURDATE()) AS atendidos,
+           (SELECT COUNT(*) FROM turnos e
+            WHERE e.caja_id = c.id AND e.estado = 'esperando' AND DATE(e.creado) = CURDATE()) AS en_fila
     FROM cajas c
     LEFT JOIN usuarios u ON u.id = c.usuario_id
     LEFT JOIN turnos t   ON t.caja_id = c.id AND t.estado = 'atendiendo'
@@ -34,7 +36,14 @@ $abiertas = max(1, count(array_filter($cajas, fn($c) => $c["usuario_id"] !== nul
 
 // Personas en fila hoy, la más antigua primero.
 // Quien quedó esperando otro día ya se fue: no entra en la fila de hoy.
-$fila = consultar($conexion, "SELECT numero, nombre, DATE_FORMAT(creado, '%H:%i') AS hora FROM turnos WHERE empresa_id = ? AND estado = 'esperando' AND DATE(creado) = CURDATE() ORDER BY numero", "i", $empresaId)->fetch_all(MYSQLI_ASSOC);
+// Cada turno trae la caja que eligió (null = la primera libre).
+$fila = consultar($conexion, "
+    SELECT t.numero, t.nombre, DATE_FORMAT(t.creado, '%H:%i') AS hora, c.numero AS caja
+    FROM turnos t
+    LEFT JOIN cajas c ON c.id = t.caja_id
+    WHERE t.empresa_id = ? AND t.estado = 'esperando' AND DATE(t.creado) = CURDATE()
+    ORDER BY t.numero
+", "i", $empresaId)->fetch_all(MYSQLI_ASSOC);
 
 // Resumen del día
 $hoy = consultar($conexion, "
@@ -47,6 +56,8 @@ $minutosPorTurno = minutosPorTurno($conexion, $empresaId);
 $conexion->close();
 
 $esperando = count($fila);
+// Quienes esperan «la primera libre»: cualquier caja abierta los puede llamar
+$sinCaja = count(array_filter($fila, fn($t) => $t["caja"] === null));
 $enAtencion = count(array_filter($cajas, fn($c) => $c["turno"] !== null));
 $paginaActual = "panel";
 ?>
@@ -58,7 +69,7 @@ $paginaActual = "panel";
   <meta name="theme-color" content="#0F172A">
   <title>Panel de atención | Shiftify</title>
   <link rel="stylesheet" href="assets/css/tokens.css?v=6">
-  <link rel="stylesheet" href="assets/css/styles.css?v=6">
+  <link rel="stylesheet" href="assets/css/styles.css?v=7">
 </head>
 <body class="pagina-panel">
   <a class="salto" href="#contenido">Saltar al contenido</a>
@@ -130,14 +141,14 @@ $paginaActual = "panel";
               <p class="app-caja__vacia"><?= $libre ? "Cerrada" : "Nadie en atención." ?></p>
             <?php endif; ?>
 
-            <p class="app-caja__pie"><?= $caja["atendidos"] ?> <?= $caja["atendidos"] == 1 ? "atendido" : "atendidos" ?> hoy</p>
+            <p class="app-caja__pie"><?= $caja["en_fila"] ?> en su fila · <?= $caja["atendidos"] ?> <?= $caja["atendidos"] == 1 ? "atendido" : "atendidos" ?> hoy</p>
 
             <?php if ($mia): ?>
               <div class="app-acciones">
                 <form action="turnos.php" method="POST">
                   <input type="hidden" name="accion" value="siguiente">
                   <input type="hidden" name="caja" value="<?= $caja["id"] ?>">
-                  <button class="boton boton--pequeno" type="submit"<?= $esperando ? "" : " disabled" ?>>Llamar siguiente <span aria-hidden="true">→</span></button>
+                  <button class="boton boton--pequeno" type="submit"<?= $caja["en_fila"] + $sinCaja ? "" : " disabled" ?>>Llamar siguiente <span aria-hidden="true">→</span></button>
                 </form>
                 <?php if ($caja["turno"] !== null): ?>
                   <form action="turnos.php" method="POST">
@@ -178,6 +189,13 @@ $paginaActual = "panel";
               <input id="nombre" name="nombre" type="text" maxlength="100" placeholder="Ej. Laura Castro" required>
               <button class="boton" type="submit">Dar turno</button>
             </div>
+            <label for="caja-nuevo">Caja</label>
+            <select id="caja-nuevo" name="caja">
+              <option value="0">La primera libre</option>
+              <?php foreach ($cajas as $caja): if ($caja["usuario_id"] === null) continue; ?>
+                <option value="<?= $caja["id"] ?>"><?= nombreCaja($caja["numero"]) ?> · <?= $caja["en_fila"] ?> en fila</option>
+              <?php endforeach; ?>
+            </select>
           </form>
         </section>
 
@@ -202,7 +220,7 @@ $paginaActual = "panel";
               <li class="app-turno">
                 <span class="app-turno__codigo"><?= codigoTurno($turno["numero"]) ?></span>
                 <span class="app-turno__persona"><i aria-hidden="true"><?= htmlspecialchars(iniciales($turno["nombre"])) ?></i> <?= htmlspecialchars($turno["nombre"]) ?></span>
-                <span class="app-turno__tiempo"><?= $turno["hora"] ?> · ~<?= minutosDeEspera($posicion + 1, $minutosPorTurno, $abiertas) ?> min</span>
+                <span class="app-turno__tiempo"><?= $turno["caja"] ? nombreCaja($turno["caja"]) : "Primera libre" ?> · <?= $turno["hora"] ?></span>
               </li>
             <?php endforeach; ?>
           </ol>

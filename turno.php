@@ -23,12 +23,16 @@ function turnoDeLaSesion(mysqli $conexion, int $empresaId): ?array
         return null;
     }
 
+    // Antes de la persona va quien llegó primero y lo puede atender su misma caja:
+    // los de su caja y los que esperan «la primera caja libre».
+    // Si ella no eligió caja, cualquiera de las cajas la puede llamar: cuentan todos.
     $turno = consultar($conexion, "
-        SELECT t.id, t.numero, t.nombre, t.estado, c.numero AS caja,
+        SELECT t.id, t.numero, t.nombre, t.estado, t.caja_id, c.numero AS caja,
                t.estado = 'esperando' AND DATE(t.creado) < CURDATE() AS vencido,
                (SELECT COUNT(*) FROM turnos f
                 WHERE f.empresa_id = t.empresa_id AND f.estado = 'esperando'
-                  AND DATE(f.creado) = CURDATE() AND f.numero < t.numero) AS antes
+                  AND DATE(f.creado) = CURDATE() AND f.numero < t.numero
+                  AND (t.caja_id IS NULL OR f.caja_id IS NULL OR f.caja_id = t.caja_id)) AS antes
         FROM turnos t
         LEFT JOIN cajas c ON c.id = t.caja_id
         WHERE t.id = ? AND t.empresa_id = ?
@@ -55,11 +59,15 @@ if ($empresa) {
         if ($accion === "pedir" && (!$turno || $turno["estado"] === "atendido")) {
             // Solo un turno activo por persona en cada empresa
             $nombre = trim($_POST["nombre"] ?? "");
+            $cajaId = cajaElegida($conexion, $empresaId, (string) ($_POST["caja"] ?? ""));
 
             if ($nombre === "" || mb_strlen($nombre) > 100) {
                 $error = "Escribe tu nombre (hasta 100 caracteres).";
+            } elseif ($cajaId === false) {
+                // La cerraron mientras la persona elegía
+                $error = "Esa caja acaba de cerrar. Elige otra.";
             } else {
-                $_SESSION["mis_turnos"][$empresaId] = crearTurno($conexion, $empresaId, $nombre)["id"];
+                $_SESSION["mis_turnos"][$empresaId] = crearTurno($conexion, $empresaId, $nombre, $cajaId)["id"];
                 header("Location: $esta");
                 exit;
             }
@@ -82,8 +90,13 @@ if ($empresa) {
         }
     }
 
-    // Las cajas abiertas atienden en paralelo
-    $minutos = $turno ? minutosDeEspera($turno["antes"] + 1, minutosPorTurno($conexion, $empresaId), cajasAbiertas($conexion, $empresaId)) : 0;
+    // Con caja elegida la atiende solo esa; sin caja, las abiertas atienden en paralelo
+    $cajasQueAtienden = $turno && $turno["caja_id"] !== null ? 1 : cajasAbiertas($conexion, $empresaId);
+    $minutos = $turno ? minutosDeEspera($turno["antes"] + 1, minutosPorTurno($conexion, $empresaId), $cajasQueAtienden) : 0;
+
+    // Para el formulario: cada caja con su estado y su fila
+    $cajas = cajasParaElegir($conexion, $empresaId);
+    $cajaPedida = (int) ($_POST["caja"] ?? 0);
 } else {
     // QR viejo o mal escrito: no sabemos a qué fila sumarlo
     http_response_code(404);
@@ -105,7 +118,7 @@ $conexion->close();
   <?php endif; ?>
   <title><?= $empresa ? "Turno en " . htmlspecialchars($empresa["nombre"]) : "Tu turno" ?> | Shiftify</title>
   <link rel="stylesheet" href="assets/css/tokens.css?v=6">
-  <link rel="stylesheet" href="assets/css/styles.css?v=6">
+  <link rel="stylesheet" href="assets/css/styles.css?v=7">
 </head>
 <body class="pagina-turno">
   <main class="turno">
@@ -135,6 +148,32 @@ $conexion->close();
           <input type="hidden" name="accion" value="pedir">
           <label for="nombre">Tu nombre</label>
           <input id="nombre" name="nombre" type="text" maxlength="100" autocomplete="name" placeholder="Tu nombre" value="<?= htmlspecialchars($nombre) ?>" required>
+
+          <!-- Cada caja abierta con su fila: la persona elige dónde esperar -->
+          <fieldset class="turno-cajas">
+            <legend>Elige tu caja</legend>
+            <label class="turno-caja">
+              <input type="radio" name="caja" value="0"<?= $cajaPedida === 0 ? " checked" : "" ?>>
+              <span class="turno-caja__nombre">La primera libre</span>
+              <span class="turno-caja__fila">Te llama la que se desocupe antes</span>
+            </label>
+            <?php foreach ($cajas as $caja): ?>
+              <label class="turno-caja<?= $caja["abierta"] ? "" : " turno-caja--cerrada" ?>">
+                <input type="radio" name="caja" value="<?= $caja["id"] ?>"<?= $caja["abierta"] ? "" : " disabled" ?><?= $cajaPedida === (int) $caja["id"] && $caja["abierta"] ? " checked" : "" ?>>
+                <span class="turno-caja__nombre"><?= nombreCaja($caja["numero"]) ?></span>
+                <span class="turno-caja__fila">
+                  <?php if (!$caja["abierta"]): ?>
+                    Cerrada
+                  <?php elseif ($caja["esperando"] == 0): ?>
+                    Nadie esperando
+                  <?php else: ?>
+                    <?= $caja["esperando"] ?> <?= $caja["esperando"] == 1 ? "persona esperando" : "personas esperando" ?>
+                  <?php endif; ?>
+                </span>
+              </label>
+            <?php endforeach; ?>
+          </fieldset>
+
           <button class="boton" type="submit">Tomar turno <span aria-hidden="true">→</span></button>
         </form>
 
@@ -142,6 +181,7 @@ $conexion->close();
         <h1>Tu turno, <?= htmlspecialchars($turno["nombre"]) ?></h1>
         <p class="turno__codigo"><?= codigoTurno($turno["numero"]) ?></p>
         <p class="turno__estado"><?= $turno["antes"] == 0 ? "¡Eres el siguiente!" : "En la fila" ?></p>
+        <p class="turno__nota"><?= $turno["caja"] ? "Te atenderá la <strong>" . nombreCaja($turno["caja"]) . "</strong>" : "Te llamará la primera caja que se desocupe" ?></p>
 
         <div class="turno__datos">
           <div><strong><?= $turno["antes"] ?></strong><span><?= $turno["antes"] == 1 ? "persona antes" : "personas antes" ?></span></div>
