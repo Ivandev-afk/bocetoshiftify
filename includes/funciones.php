@@ -48,15 +48,16 @@ function crearSlug(string $nombre): string
 
 // Guarda un turno nuevo en la fila de la empresa y devuelve su id y su número.
 // El número sigue la cuenta de esa empresa: cada negocio empieza en A-001.
-function crearTurno(mysqli $conexion, int $empresaId, string $nombre): array
+// $cajaId: la caja que eligió la persona, o null si la atiende la primera caja libre.
+function crearTurno(mysqli $conexion, int $empresaId, string $nombre, ?int $cajaId = null): array
 {
     // Transacción: dos personas que piden turno a la vez no reciben el mismo número
     $conexion->begin_transaction();
 
     $numero = consultar($conexion, "SELECT COALESCE(MAX(numero), 0) + 1 AS siguiente FROM turnos WHERE empresa_id = ? FOR UPDATE", "i", $empresaId)->fetch_assoc()["siguiente"];
 
-    $stmt = $conexion->prepare("INSERT INTO turnos (empresa_id, numero, nombre) VALUES (?, ?, ?)");
-    $stmt->bind_param("iis", $empresaId, $numero, $nombre);
+    $stmt = $conexion->prepare("INSERT INTO turnos (empresa_id, numero, nombre, caja_id) VALUES (?, ?, ?, ?)");
+    $stmt->bind_param("iisi", $empresaId, $numero, $nombre, $cajaId);
     $stmt->execute();
     $id = $stmt->insert_id;
     $stmt->close();
@@ -116,4 +117,32 @@ function minutosDeEspera(int $personas, int $minutosPorTurno, int $cajas): int
 function nombreCaja(int $numero): string
 {
     return "Caja $numero";
+}
+
+// Cajas de la empresa para elegir al pedir turno: si están abiertas (tienen asesor)
+// y cuántas personas esperan hoy en la fila propia de cada una
+function cajasParaElegir(mysqli $conexion, int $empresaId): array
+{
+    return consultar($conexion, "
+        SELECT c.id, c.numero, c.usuario_id IS NOT NULL AS abierta,
+               (SELECT COUNT(*) FROM turnos t
+                WHERE t.caja_id = c.id AND t.estado = 'esperando' AND DATE(t.creado) = CURDATE()) AS esperando
+        FROM cajas c
+        WHERE c.empresa_id = ?
+        ORDER BY c.numero
+    ", "i", $empresaId)->fetch_all(MYSQLI_ASSOC);
+}
+
+// Valida la caja elegida en un formulario: "" o "0" es «la primera caja libre» (null).
+// Devuelve el id si es una caja abierta de la empresa, null si no eligió, o false si no vale.
+function cajaElegida(mysqli $conexion, int $empresaId, string $valor): int|null|false
+{
+    $cajaId = (int) $valor;
+    if ($cajaId === 0) {
+        return null;
+    }
+
+    $abierta = consultar($conexion, "SELECT id FROM cajas WHERE id = ? AND empresa_id = ? AND usuario_id IS NOT NULL", "ii", $cajaId, $empresaId)->fetch_assoc();
+
+    return $abierta ? $cajaId : false;
 }
