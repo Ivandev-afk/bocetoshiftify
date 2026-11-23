@@ -9,10 +9,20 @@ $clave     = getenv("DB_PASSWORD") ?: "";
 $baseDatos = getenv("DB_NAME") ?: "shiftify";
 $puerto    = (int) (getenv("DB_PORT") ?: 3306);
 
-$conexion = new mysqli($servidor, $usuario, $clave, $baseDatos, $puerto);
+// Desde PHP 8.1 un fallo al conectar lanza una excepción (en 8.0 solo deja
+// connect_error): se atienden los dos casos igual.
+try {
+    $conexion = new mysqli($servidor, $usuario, $clave, $baseDatos, $puerto);
+    $fallo = $conexion->connect_error;
+} catch (mysqli_sql_exception $e) {
+    $fallo = $e->getMessage();
+}
 
-if ($conexion->connect_error) {
-    die("Error de conexión: " . $conexion->connect_error);
+if ($fallo) {
+    // El detalle va al log del servidor; el visitante no ve rutas ni datos internos
+    error_log("Shiftify: no se pudo conectar a MySQL en $servidor:$puerto: $fallo");
+    http_response_code(503);
+    die("Error de conexión con la base de datos. Intenta de nuevo en unos minutos.");
 }
 
 // UTF-8 completo para tildes, ñ y emojis
