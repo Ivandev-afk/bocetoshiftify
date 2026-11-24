@@ -84,7 +84,7 @@ $conexion->close();
   <meta name="theme-color" content="#0F172A">
   <title><?= $empresa ? "Turno en " . htmlspecialchars($empresa["nombre"]) : "Tu turno" ?> | Shiftify</title>
   <link rel="stylesheet" href="assets/css/tokens.css?v=6">
-  <link rel="stylesheet" href="assets/css/styles.css?v=8">
+  <link rel="stylesheet" href="assets/css/styles.css?v=9">
 </head>
 <body class="pagina-turno<?= $turno && $turno["estado"] === "atendiendo" && !$mostrarFormulario ? " pagina-turno--llamado" : "" ?>">
   <main class="turno">
@@ -157,7 +157,8 @@ $conexion->close();
         <!-- Un toque del cliente es el permiso que piden los navegadores para sonar -->
         <div class="turno-aviso" id="turno-aviso">
           <button class="boton turno-aviso__boton" type="button" id="activar-aviso">🔔 Activar aviso con sonido</button>
-          <p class="turno__nota" id="aviso-estado">Te avisamos con sonido y vibración cuando estés cerca y cuando te llamen.</p>
+          <button class="boton boton--claro turno-aviso__boton turno-aviso__prueba" type="button" id="probar-sonido" hidden>🔊 Probar sonido</button>
+          <p class="turno__nota" id="aviso-estado">Te avisamos con sonido y vibración cuando estés cerca y cuando te llamen. Sube el volumen y deja la pantalla encendida.</p>
         </div>
         <p class="turno__nota">Esta página se actualiza sola, no la cierres.</p>
 
@@ -187,7 +188,7 @@ $conexion->close();
 
   <?php if ($turno && !$mostrarFormulario && $turno["estado"] !== "atendido"): ?>
     <!-- Sigue la fila sin recargar: avisa con sonido, vibración y notificación -->
-    <script src="assets/js/aviso-turno.js?v=1"
+    <script src="assets/js/aviso-turno.js?v=2"
             data-estado-url="estado_turno.php?e=<?= urlencode($empresa["slug"]) ?>"
             data-turno-id="<?= (int) $turno["id"] ?>"
             data-estado="<?= htmlspecialchars($turno["estado"]) ?>"

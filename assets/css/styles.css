@@ -3195,3 +3195,11 @@ input:focus-visible {
     transform: none;
   }
 }
+
+.turno-aviso__prueba {
+  margin-top: var(--e-2);
+}
+
+.turno-aviso__prueba[hidden] {
+  display: none;
+}
