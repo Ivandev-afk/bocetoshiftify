@@ -3542,3 +3542,21 @@ body:has(.recorrido) {
 .pie__enlaces a:hover {
   color: var(--acento-calido);
 }
+
+/* Aviso de demostración en la página del turno (llega desde «Probar demo») */
+.turno__demo {
+  margin-top: var(--e-4);
+  padding: var(--e-3) var(--e-4);
+  border: 1px solid color-mix(in srgb, var(--acento-calido) 45%, transparent);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--acento-calido) 14%, var(--superficie-elevada));
+  color: var(--contenido-fuerte);
+  font-size: var(--texto-sm);
+  text-align: left;
+}
+
+.turno__demo a {
+  color: var(--acento);
+  font-weight: var(--peso-semi);
+  text-decoration: underline;
+}

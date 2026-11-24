@@ -67,7 +67,7 @@ $paginaActual = "usuarios";
   <meta name="theme-color" content="#0F172A">
   <title>Equipo | Shiftify</title>
   <link rel="stylesheet" href="assets/css/tokens.css?v=6">
-  <link rel="stylesheet" href="assets/css/styles.css?v=12">
+  <link rel="stylesheet" href="assets/css/styles.css?v=13">
 </head>
 <body class="pagina-panel">
   <a class="salto" href="#contenido">Saltar al contenido</a>
