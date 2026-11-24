@@ -27,3 +27,9 @@ if ($fallo) {
 
 // UTF-8 completo para tildes, ñ y emojis
 $conexion->set_charset("utf8mb4");
+
+// Hora de Colombia (UTC-5, sin horario de verano) en todas las consultas.
+// El hosting corre en UTC: sin esto CURDATE() cambia de día a las 7 p. m. y la
+// fila de hoy se vaciaba. Las columnas TIMESTAMP se guardan en UTC y MySQL las
+// convierte a esta zona al leerlas, así que los datos viejos se ven bien.
+$conexion->query("SET time_zone = '-05:00'");

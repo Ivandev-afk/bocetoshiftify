@@ -10,6 +10,13 @@ unset($_SESSION["aviso"], $_SESSION["error"]);
 
 // Todo se filtra por la empresa de la sesión: cada negocio ve solo su fila
 
+// El asesor sigue aquí (el panel se recarga cada 20 s); y las cajas de quien se
+// fue sin pulsar «Dejar caja» se liberan para que nadie espere en una caja vacía
+marcarActividad($conexion, (int) $_SESSION["usuario_id"]);
+if ($liberadas = liberarCajasInactivas($conexion, $empresaId)) {
+    $aviso = trim("$aviso " . ($liberadas == 1 ? "Se liberó 1 caja" : "Se liberaron $liberadas cajas") . " sin actividad en " . MINUTOS_CAJA_INACTIVA . " min; su fila pasó a «la primera libre».");
+}
+
 // Las cajas, con su asesor, el turno que atienden y cuántos atendieron hoy
 $cajas = consultar($conexion, "
     SELECT c.id, c.numero, c.usuario_id, u.nombre AS asesor,
@@ -163,6 +170,15 @@ $paginaActual = "panel";
                     <button class="boton boton--claro boton--pequeno" type="submit">Dejar caja</button>
                   </form>
                 <?php endif; ?>
+              </div>
+            <?php elseif (!$libre): ?>
+              <!-- Para una caja que quedó tomada por alguien que ya no está -->
+              <div class="app-acciones">
+                <form action="turnos.php" method="POST" onsubmit="return confirm('¿Liberar <?= nombreCaja($caja["numero"]) ?> de <?= htmlspecialchars(addslashes($caja["asesor"]), ENT_QUOTES) ?>? Su atención en curso se cerrará y quienes esperaban en ella pasarán a «la primera libre».')">
+                  <input type="hidden" name="accion" value="liberar">
+                  <input type="hidden" name="caja" value="<?= $caja["id"] ?>">
+                  <button class="boton boton--claro boton--pequeno" type="submit">Liberar caja</button>
+                </form>
               </div>
             <?php elseif ($libre && !$miCaja): ?>
               <div class="app-acciones">
