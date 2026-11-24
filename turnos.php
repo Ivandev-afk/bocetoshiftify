@@ -121,7 +121,7 @@ if ($accion === "crear") {
         } else {
             // 2. Llamar al primero de hoy que puede atender esta caja: quien la eligió
             //    o quien espera «la primera libre». Nunca a quien eligió otra caja.
-            $siguiente = consultar($conexion, "SELECT id, numero, nombre FROM turnos WHERE empresa_id = ? AND estado = 'esperando' AND DATE(creado) = CURDATE() AND (caja_id = ? OR caja_id IS NULL) ORDER BY numero LIMIT 1 FOR UPDATE", "ii", $empresaId, $caja["id"])->fetch_assoc();
+            $siguiente = consultar($conexion, "SELECT id, numero, nombre FROM turnos WHERE empresa_id = ? AND estado = 'esperando' AND creado >= CURDATE() AND creado < CURDATE() + INTERVAL 1 DAY AND (caja_id = ? OR caja_id IS NULL) ORDER BY numero LIMIT 1 FOR UPDATE", "ii", $empresaId, $caja["id"])->fetch_assoc();
 
             if ($siguiente) {
                 consultar($conexion, "UPDATE turnos SET estado = 'atendiendo', caja_id = ?, llamado = NOW() WHERE id = ?", "ii", $caja["id"], $siguiente["id"]);

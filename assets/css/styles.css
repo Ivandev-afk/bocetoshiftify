@@ -2300,7 +2300,8 @@ input:focus-visible {
   font-weight: var(--peso-semi);
 }
 
-.home-turnos__titulo > span {
+.home-turnos__titulo > span,
+.home-turnos__titulo > a {
   color: var(--acento);
   font-size: 0.6rem;
   font-weight: var(--peso-semi);
@@ -3227,4 +3228,18 @@ input:focus-visible {
   background: var(--superficie-elevada);
   color: var(--contenido-fuerte);
   font: inherit;
+}
+
+.app-qr__descargar {
+  margin-top: var(--e-3);
+}
+
+/* Los controles del panel de ejemplo de la portada llevan al panel real */
+.home-turnos__titulo > a:hover,
+.home-sucursal__icono:hover {
+  color: var(--acento-hover);
+}
+
+a.home-sucursal__icono {
+  text-decoration: none;
 }

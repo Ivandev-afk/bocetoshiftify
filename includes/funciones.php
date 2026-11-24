@@ -105,7 +105,7 @@ function minutosPorCaja(mysqli $conexion, int $empresaId): array
                AVG(LEAST(TIMESTAMPDIFF(SECOND, t.llamado, t.finalizado), ?)) AS segundos
         FROM cajas c
         JOIN empresas e ON e.id = c.empresa_id
-        LEFT JOIN turnos t ON t.caja_id = c.id AND t.estado = 'atendido' AND DATE(t.llamado) = CURDATE()
+        LEFT JOIN turnos t ON t.caja_id = c.id AND t.estado = 'atendido' AND t.llamado >= CURDATE() AND t.llamado < CURDATE() + INTERVAL 1 DAY
         WHERE c.empresa_id = ? AND c.usuario_id IS NOT NULL
         GROUP BY c.id, c.minutos, e.minutos_base
     ", "ii", MINUTOS_MAXIMOS_ATENCION * 60, $empresaId)->fetch_all(MYSQLI_ASSOC);
@@ -223,7 +223,7 @@ function cajasParaElegir(mysqli $conexion, int $empresaId): array
     return consultar($conexion, "
         SELECT c.id, c.numero, c.usuario_id IS NOT NULL AS abierta,
                (SELECT COUNT(*) FROM turnos t
-                WHERE t.caja_id = c.id AND t.estado = 'esperando' AND DATE(t.creado) = CURDATE()) AS esperando
+                WHERE t.caja_id = c.id AND t.estado = 'esperando' AND t.creado >= CURDATE() AND t.creado < CURDATE() + INTERVAL 1 DAY) AS esperando
         FROM cajas c
         WHERE c.empresa_id = ?
         ORDER BY c.numero
@@ -257,10 +257,10 @@ function turnoDeLaSesion(mysqli $conexion, int $empresaId): ?array
     // Si ella no eligió caja, cualquiera de las cajas la puede llamar: cuentan todos.
     $turno = consultar($conexion, "
         SELECT t.id, t.numero, t.nombre, t.estado, t.caja_id, c.numero AS caja,
-               t.estado = 'esperando' AND DATE(t.creado) < CURDATE() AS vencido,
+               t.estado = 'esperando' AND t.creado < CURDATE() AS vencido,
                (SELECT COUNT(*) FROM turnos f
                 WHERE f.empresa_id = t.empresa_id AND f.estado = 'esperando'
-                  AND DATE(f.creado) = CURDATE() AND f.numero < t.numero
+                  AND f.creado >= CURDATE() AND f.creado < CURDATE() + INTERVAL 1 DAY AND f.numero < t.numero
                   AND (t.caja_id IS NULL OR f.caja_id IS NULL OR f.caja_id = t.caja_id)) AS antes
         FROM turnos t
         LEFT JOIN cajas c ON c.id = t.caja_id

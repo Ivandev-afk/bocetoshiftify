@@ -22,9 +22,9 @@ $cajas = consultar($conexion, "
     SELECT c.id, c.numero, c.usuario_id, c.minutos, u.nombre AS asesor,
            t.numero AS turno, t.nombre, DATE_FORMAT(t.llamado, '%H:%i') AS hora,
            (SELECT COUNT(*) FROM turnos a
-            WHERE a.caja_id = c.id AND a.estado = 'atendido' AND DATE(a.finalizado) = CURDATE()) AS atendidos,
+            WHERE a.caja_id = c.id AND a.estado = 'atendido' AND a.finalizado >= CURDATE() AND a.finalizado < CURDATE() + INTERVAL 1 DAY) AS atendidos,
            (SELECT COUNT(*) FROM turnos e
-            WHERE e.caja_id = c.id AND e.estado = 'esperando' AND DATE(e.creado) = CURDATE()) AS en_fila
+            WHERE e.caja_id = c.id AND e.estado = 'esperando' AND e.creado >= CURDATE() AND e.creado < CURDATE() + INTERVAL 1 DAY) AS en_fila
     FROM cajas c
     LEFT JOIN usuarios u ON u.id = c.usuario_id
     LEFT JOIN turnos t   ON t.caja_id = c.id AND t.estado = 'atendiendo'
@@ -47,7 +47,7 @@ $fila = consultar($conexion, "
     SELECT t.numero, t.nombre, DATE_FORMAT(t.creado, '%H:%i') AS hora, c.numero AS caja
     FROM turnos t
     LEFT JOIN cajas c ON c.id = t.caja_id
-    WHERE t.empresa_id = ? AND t.estado = 'esperando' AND DATE(t.creado) = CURDATE()
+    WHERE t.empresa_id = ? AND t.estado = 'esperando' AND t.creado >= CURDATE() AND t.creado < CURDATE() + INTERVAL 1 DAY
     ORDER BY t.numero
 ", "i", $empresaId)->fetch_all(MYSQLI_ASSOC);
 
@@ -55,7 +55,7 @@ $fila = consultar($conexion, "
 $hoy = consultar($conexion, "
     SELECT DATE_FORMAT(CURDATE(), '%d/%m/%Y') AS fecha, COUNT(*) AS atendidos
     FROM turnos
-    WHERE empresa_id = ? AND estado = 'atendido' AND DATE(finalizado) = CURDATE()
+    WHERE empresa_id = ? AND estado = 'atendido' AND finalizado >= CURDATE() AND finalizado < CURDATE() + INTERVAL 1 DAY
 ", "i", $empresaId)->fetch_assoc();
 
 // Minutos por atención de cada caja abierta (real, del asesor o del negocio)
@@ -77,7 +77,7 @@ $paginaActual = "panel";
   <meta name="theme-color" content="#0F172A">
   <title>Panel de atención | Shiftify</title>
   <link rel="stylesheet" href="assets/css/tokens.css?v=6">
-  <link rel="stylesheet" href="assets/css/styles.css?v=9">
+  <link rel="stylesheet" href="assets/css/styles.css?v=10">
 </head>
 <body class="pagina-panel">
   <a class="salto" href="#contenido">Saltar al contenido</a>
@@ -97,7 +97,7 @@ $paginaActual = "panel";
       <p class="app-aviso app-aviso--error" role="alert"><?= htmlspecialchars($error) ?></p>
     <?php endif; ?>
 
-    <section class="app-metricas" aria-label="Resumen de la fila">
+    <section class="app-metricas" aria-label="Resumen de la fila" id="vivo-metricas" data-vivo>
       <div class="app-metrica app-metrica--principal">
         <span>Personas esperando</span>
         <strong><?= sprintf("%02d", $esperando) ?></strong>
@@ -116,7 +116,7 @@ $paginaActual = "panel";
       </div>
     </section>
 
-    <section class="app-cajas" aria-labelledby="cajas-titulo">
+    <section class="app-cajas" aria-labelledby="cajas-titulo" id="vivo-cajas" data-vivo>
       <div class="app-cajas__cabecera">
         <h2 id="cajas-titulo">Cajas</h2>
         <p class="app-nota">
@@ -252,10 +252,11 @@ $paginaActual = "panel";
           <h2 id="qr-titulo">QR de tu fila</h2>
           <p class="app-nota">Imprímelo y ponlo en la entrada: quien lo escanee entra a la fila de <?= htmlspecialchars($_SESSION["empresa_nombre"]) ?>.</p>
           <img src="qr.php?e=<?= urlencode($_SESSION["empresa_slug"]) ?>" width="200" height="200" alt="Código QR de la fila de <?= htmlspecialchars($_SESSION["empresa_nombre"]) ?>">
+          <a class="boton boton--claro boton--pequeno app-qr__descargar" href="qr.php?e=<?= urlencode($_SESSION["empresa_slug"]) ?>&amp;descargar=1">Descargar QR para imprimir</a>
         </section>
       </div>
 
-      <section class="app-tarjeta" aria-labelledby="fila-titulo">
+      <section class="app-tarjeta" aria-labelledby="fila-titulo" id="vivo-fila" data-vivo>
         <div class="app-tarjeta__titulo">
           <h2 id="fila-titulo">Siguiente en fila</h2>
           <span class="app-contador"><?= $esperando ?></span>
@@ -278,15 +279,8 @@ $paginaActual = "panel";
     </div>
   </main>
 
-  <script>
-    // Otros asesores mueven la fila: el panel se actualiza cada 20 s,
-    // salvo mientras alguien escribe un nombre en «Nuevo turno»
-    setInterval(function () {
-      var campo = document.getElementById("nombre");
-      if (!campo || (campo.value === "" && document.activeElement !== campo)) {
-        location.reload();
-      }
-    }, 20000);
-  </script>
+  <!-- Otros asesores mueven la fila: cada 10 s se traen solo las partes que cambian
+       (métricas, cajas y fila), sin recargar ni mover la página -->
+  <script src="assets/js/panel-vivo.js?v=1"></script>
 </body>
 </html>

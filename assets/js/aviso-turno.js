@@ -1,6 +1,7 @@
 // Aviso del turno en la página del cliente (turno.php).
 //
-// - Consulta estado_turno.php cada 5 s sin recargar la página: así no se pierde
+// - Consulta estado_turno.php sin recargar la página (cada 5 s cerca del turno,
+//   10–15 s si falta mucho): así no se pierde
 //   el permiso de sonido, que los navegadores solo dan tras un toque del usuario.
 // - Pre-aviso suave cuando queda 1 persona (o ninguna) antes.
 // - Al llamarlo: timbre, vibración, notificación del sistema y título parpadeando.
@@ -18,6 +19,7 @@
   const turnoId = script.dataset.turnoId;
   const negocio = script.dataset.negocio;
   let estado = script.dataset.estado;
+  let antes = Number(script.dataset.antes || 0);
 
   const clavePreaviso = "shiftify-preaviso-" + turnoId;
   const tituloOriginal = document.title;
@@ -241,6 +243,7 @@
       }
 
       if (datos.estado === "esperando") {
+        antes = datos.antes;
         pintar(datos);
         // Solo con el aviso activado: si no, se guardaría como dado sin haber sonado
         if (datos.antes <= 1 && activado) preaviso(datos);
@@ -252,5 +255,19 @@
     }
   }
 
-  setInterval(revisar, 5000);
+  // Cada cuánto preguntar: rápido cuando está cerca, más espaciado cuando falta.
+  // Con mucha gente esperando, el servidor recibe muchas menos consultas.
+  function intervalo() {
+    if (estado !== "esperando" || antes <= 2) return 5000;
+    if (antes <= 10) return 10000;
+    return 15000;
+  }
+
+  function programar() {
+    setTimeout(async () => {
+      await revisar();
+      programar();
+    }, intervalo());
+  }
+  programar();
 })();
