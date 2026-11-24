@@ -16,38 +16,6 @@ unset($_SESSION["turno_aviso"]);
 $empresa = empresaPorSlug($conexion, $_GET["e"] ?? "");
 $turno   = null;
 
-// Busca el turno guardado en la sesión para esta empresa, con cuántas personas tiene delante
-function turnoDeLaSesion(mysqli $conexion, int $empresaId): ?array
-{
-    if (!isset($_SESSION["mis_turnos"][$empresaId])) {
-        return null;
-    }
-
-    // Antes de la persona va quien llegó primero y lo puede atender su misma caja:
-    // los de su caja y los que esperan «la primera caja libre».
-    // Si ella no eligió caja, cualquiera de las cajas la puede llamar: cuentan todos.
-    $turno = consultar($conexion, "
-        SELECT t.id, t.numero, t.nombre, t.estado, t.caja_id, c.numero AS caja,
-               t.estado = 'esperando' AND DATE(t.creado) < CURDATE() AS vencido,
-               (SELECT COUNT(*) FROM turnos f
-                WHERE f.empresa_id = t.empresa_id AND f.estado = 'esperando'
-                  AND DATE(f.creado) = CURDATE() AND f.numero < t.numero
-                  AND (t.caja_id IS NULL OR f.caja_id IS NULL OR f.caja_id = t.caja_id)) AS antes
-        FROM turnos t
-        LEFT JOIN cajas c ON c.id = t.caja_id
-        WHERE t.id = ? AND t.empresa_id = ?
-    ", "ii", $_SESSION["mis_turnos"][$empresaId], $empresaId)->fetch_assoc();
-
-    // Un turno cancelado, o que quedó esperando otro día, ya no está en la fila:
-    // la persona puede pedir uno nuevo
-    if (!$turno || $turno["vencido"] || $turno["estado"] === "cancelado") {
-        unset($_SESSION["mis_turnos"][$empresaId]);
-        return null;
-    }
-
-    return $turno;
-}
-
 if ($empresa) {
     $empresaId = (int) $empresa["id"];
     // Antes de mostrar cajas: una caja abandonada no se ofrece ni retiene a nadie
@@ -114,15 +82,11 @@ $conexion->close();
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0F172A">
-  <?php if ($turno && $turno["estado"] !== "atendido"): ?>
-    <!-- Recarga cada 15 s para que la posición en la fila esté al día -->
-    <meta http-equiv="refresh" content="15">
-  <?php endif; ?>
   <title><?= $empresa ? "Turno en " . htmlspecialchars($empresa["nombre"]) : "Tu turno" ?> | Shiftify</title>
   <link rel="stylesheet" href="assets/css/tokens.css?v=6">
-  <link rel="stylesheet" href="assets/css/styles.css?v=7">
+  <link rel="stylesheet" href="assets/css/styles.css?v=8">
 </head>
-<body class="pagina-turno">
+<body class="pagina-turno<?= $turno && $turno["estado"] === "atendiendo" && !$mostrarFormulario ? " pagina-turno--llamado" : "" ?>">
   <main class="turno">
     <article class="turno__tarjeta">
       <img class="marca__imagen" src="assets/img/shiftify-logo.png" alt="Shiftify">
@@ -182,12 +146,18 @@ $conexion->close();
       <?php elseif ($turno["estado"] === "esperando"): ?>
         <h1>Tu turno, <?= htmlspecialchars($turno["nombre"]) ?></h1>
         <p class="turno__codigo"><?= codigoTurno($turno["numero"]) ?></p>
-        <p class="turno__estado"><?= $turno["antes"] == 0 ? "¡Eres el siguiente!" : "En la fila" ?></p>
-        <p class="turno__nota"><?= $turno["caja"] ? "Te atenderá la <strong>" . nombreCaja($turno["caja"]) . "</strong>" : "Te llamará la primera caja que se desocupe" ?></p>
+        <p class="turno__estado" id="turno-estado"><?= $turno["antes"] == 0 ? "¡Eres el siguiente!" : "En la fila" ?></p>
+        <p class="turno__nota" id="turno-caja"><?= $turno["caja"] ? "Te atenderá la <strong>" . nombreCaja($turno["caja"]) . "</strong>" : "Te llamará la primera caja que se desocupe" ?></p>
 
         <div class="turno__datos">
-          <div><strong><?= $turno["antes"] ?></strong><span><?= $turno["antes"] == 1 ? "persona antes" : "personas antes" ?></span></div>
-          <div><strong>~<?= $minutos ?></strong><span>minutos de espera</span></div>
+          <div><strong id="turno-antes"><?= $turno["antes"] ?></strong><span id="turno-antes-texto"><?= $turno["antes"] == 1 ? "persona antes" : "personas antes" ?></span></div>
+          <div><strong id="turno-minutos">~<?= $minutos ?></strong><span>minutos de espera</span></div>
+        </div>
+
+        <!-- Un toque del cliente es el permiso que piden los navegadores para sonar -->
+        <div class="turno-aviso" id="turno-aviso">
+          <button class="boton turno-aviso__boton" type="button" id="activar-aviso">🔔 Activar aviso con sonido</button>
+          <p class="turno__nota" id="aviso-estado">Te avisamos con sonido y vibración cuando estés cerca y cuando te llamen.</p>
         </div>
         <p class="turno__nota">Esta página se actualiza sola, no la cierres.</p>
 
@@ -198,9 +168,9 @@ $conexion->close();
         </form>
 
       <?php elseif ($turno["estado"] === "atendiendo"): ?>
-        <h1>¡Es tu turno!</h1>
+        <h1 class="turno__llamado">¡TE TOCA!</h1>
         <p class="turno__codigo"><?= codigoTurno($turno["numero"]) ?></p>
-        <p class="turno__estado turno__estado--ahora">Acércate a la <?= $turno["caja"] ? nombreCaja($turno["caja"]) : "ventanilla" ?></p>
+        <p class="turno__estado turno__estado--ahora">Acércate a la <strong><?= $turno["caja"] ? nombreCaja($turno["caja"]) : "ventanilla" ?></strong></p>
 
       <?php else: ?>
         <h1>¡Gracias, <?= htmlspecialchars($turno["nombre"]) ?>!</h1>
@@ -214,5 +184,15 @@ $conexion->close();
       <?php endif; ?>
     </article>
   </main>
+
+  <?php if ($turno && !$mostrarFormulario && $turno["estado"] !== "atendido"): ?>
+    <!-- Sigue la fila sin recargar: avisa con sonido, vibración y notificación -->
+    <script src="assets/js/aviso-turno.js?v=1"
+            data-estado-url="estado_turno.php?e=<?= urlencode($empresa["slug"]) ?>"
+            data-turno-id="<?= (int) $turno["id"] ?>"
+            data-estado="<?= htmlspecialchars($turno["estado"]) ?>"
+            data-antes="<?= (int) $turno["antes"] ?>"
+            data-negocio="<?= htmlspecialchars($empresa["nombre"]) ?>"></script>
+  <?php endif; ?>
 </body>
 </html>

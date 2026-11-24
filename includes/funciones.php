@@ -193,3 +193,36 @@ function cajaElegida(mysqli $conexion, int $empresaId, string $valor): int|null|
 
     return $abierta ? $cajaId : false;
 }
+
+// Turno guardado en la sesión del visitante para esta empresa (lo usan turno.php y
+// estado_turno.php), con cuántas personas tiene delante
+function turnoDeLaSesion(mysqli $conexion, int $empresaId): ?array
+{
+    if (!isset($_SESSION["mis_turnos"][$empresaId])) {
+        return null;
+    }
+
+    // Antes de la persona va quien llegó primero y lo puede atender su misma caja:
+    // los de su caja y los que esperan «la primera caja libre».
+    // Si ella no eligió caja, cualquiera de las cajas la puede llamar: cuentan todos.
+    $turno = consultar($conexion, "
+        SELECT t.id, t.numero, t.nombre, t.estado, t.caja_id, c.numero AS caja,
+               t.estado = 'esperando' AND DATE(t.creado) < CURDATE() AS vencido,
+               (SELECT COUNT(*) FROM turnos f
+                WHERE f.empresa_id = t.empresa_id AND f.estado = 'esperando'
+                  AND DATE(f.creado) = CURDATE() AND f.numero < t.numero
+                  AND (t.caja_id IS NULL OR f.caja_id IS NULL OR f.caja_id = t.caja_id)) AS antes
+        FROM turnos t
+        LEFT JOIN cajas c ON c.id = t.caja_id
+        WHERE t.id = ? AND t.empresa_id = ?
+    ", "ii", $_SESSION["mis_turnos"][$empresaId], $empresaId)->fetch_assoc();
+
+    // Un turno cancelado, o que quedó esperando otro día, ya no está en la fila:
+    // la persona puede pedir uno nuevo
+    if (!$turno || $turno["vencido"] || $turno["estado"] === "cancelado") {
+        unset($_SESSION["mis_turnos"][$empresaId]);
+        return null;
+    }
+
+    return $turno;
+}
