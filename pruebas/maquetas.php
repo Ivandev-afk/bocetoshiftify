@@ -26,8 +26,45 @@ const ENLACES = [
     "salir.php"    => "login.html",
 ];
 
+// Orden del recorrido por las maquetas: la historia de Cecilia y sus clientes.
+// Cada maqueta lleva una barra «← Anterior · Todas · Siguiente →».
+const RECORRIDO = [
+    "login.html"           => "Iniciar sesión",
+    "registro.html"        => "Registro del negocio",
+    "panel-nuevo.html"     => "Panel recién creado",
+    "equipo.html"          => "Equipo",
+    "turno-pedir.html"     => "Cliente: pide turno",
+    "turno-esperando.html" => "Cliente: esperando",
+    "panel.html"           => "Panel con la fila",
+    "turno-ahora.html"     => "Cliente: ¡te toca!",
+    "turno-fin.html"       => "Cliente: atención finalizada",
+    "turno-no-existe.html" => "QR de un negocio que no existe",
+];
+
+// Barra para ir a la maqueta anterior, a la galería o a la siguiente
+function barraRecorrido(string $archivo): string
+{
+    $nombres = array_keys(RECORRIDO);
+    $i = array_search($archivo, $nombres, true);
+    if ($i === false) {
+        return "";
+    }
+    $anterior = $nombres[$i - 1] ?? null;
+    $siguiente = $nombres[$i + 1] ?? null;
+
+    $html = "\n  <nav class=\"recorrido\" aria-label=\"Recorrido por las pantallas\">";
+    $html .= $anterior
+        ? "\n    <a class=\"recorrido__boton\" href=\"$anterior\" rel=\"prev\"><span aria-hidden=\"true\">←</span> <span class=\"recorrido__texto\">" . RECORRIDO[$anterior] . "</span></a>"
+        : "\n    <a class=\"recorrido__boton\" href=\"../index.html\"><span aria-hidden=\"true\">←</span> <span class=\"recorrido__texto\">Inicio</span></a>";
+    $html .= "\n    <a class=\"recorrido__centro\" href=\"index.html\">" . ($i + 1) . " de " . count($nombres) . " · Todas</a>";
+    $html .= $siguiente
+        ? "\n    <a class=\"recorrido__boton recorrido__boton--siguiente\" href=\"$siguiente\" rel=\"next\"><span class=\"recorrido__texto\">" . RECORRIDO[$siguiente] . "</span> <span aria-hidden=\"true\">→</span></a>"
+        : "\n    <a class=\"recorrido__boton recorrido__boton--siguiente\" href=\"index.html\"><span class=\"recorrido__texto\">Volver a la galería</span> <span aria-hidden=\"true\">→</span></a>";
+    return $html . "\n  </nav>\n";
+}
+
 // Convierte una página PHP en una maqueta estática que se navega sola
-function maqueta(string $html): string
+function maqueta(string $html, string $archivo = ""): string
 {
     // Estilos e imágenes viven un nivel arriba
     $html = str_replace(['href="assets/', 'src="assets/'], ['href="../assets/', 'src="../assets/'], $html);
@@ -69,6 +106,9 @@ function maqueta(string $html): string
     $aviso = "\n  <p class=\"maqueta-aviso\">Maqueta con datos de ejemplo · <a href=\"index.html\">Ver todas las pantallas</a></p>";
     $html = preg_replace('#(<body[^>]*>)#', '$1' . $aviso, $html, 1);
 
+    // Ir a la pantalla anterior o siguiente del recorrido
+    $html = str_replace("</body>", barraRecorrido($archivo) . "</body>", $html);
+
     // Sin espacios sueltos al final de las líneas que dejan los bloques de PHP
     return preg_replace("/[ \t]+\n/", "\n", $html);
 }
@@ -78,7 +118,7 @@ function guardar(string $archivo, array $respuesta): void
     if ($respuesta["codigo"] !== 200 && $respuesta["codigo"] !== 404) {
         throw new RuntimeException("$archivo: la página respondió HTTP {$respuesta['codigo']}");
     }
-    file_put_contents(DESTINO . "/$archivo", maqueta($respuesta["html"]));
+    file_put_contents(DESTINO . "/$archivo", maqueta($respuesta["html"], $archivo));
     echo "  pantallas/$archivo\n";
 }
 

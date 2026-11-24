@@ -3429,3 +3429,116 @@ a.home-sucursal__icono {
   display: flex;
   justify-content: flex-start;
 }
+
+/* Recorrido por las maquetas de pantallas/: anterior · todas · siguiente */
+.recorrido {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 50;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: var(--e-2);
+  padding: 0.6rem max(var(--e-4), env(safe-area-inset-left));
+  padding-bottom: max(0.6rem, env(safe-area-inset-bottom));
+  border-top: 1px solid var(--borde);
+  background: color-mix(in srgb, var(--superficie-elevada) 94%, transparent);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 -6px 20px rgba(15, 23, 42, 0.08);
+  font-size: var(--texto-sm);
+}
+
+body:has(.recorrido) {
+  padding-bottom: 4.5rem;
+}
+
+.recorrido__boton {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  gap: 0.4rem;
+  justify-self: start;
+  padding: 0.5rem 0.85rem;
+  border: 1px solid var(--borde-fuerte);
+  border-radius: var(--radio-md);
+  background: var(--superficie-elevada);
+  color: var(--contenido-fuerte);
+  font-weight: var(--peso-semi);
+}
+
+.recorrido__boton--siguiente {
+  justify-self: end;
+  border-color: var(--acento);
+  background: var(--acento);
+  color: #fff;
+}
+
+.recorrido__boton:hover {
+  border-color: var(--acento);
+}
+
+.recorrido__centro {
+  color: var(--contenido-suave);
+  font-size: var(--texto-xs, 0.75rem);
+  white-space: nowrap;
+}
+
+@media (max-width: 560px) {
+  .recorrido__texto {
+    display: none;
+  }
+}
+
+/* Portada: volver arriba y enlaces del pie */
+.arriba {
+  position: fixed;
+  right: max(1rem, env(safe-area-inset-right));
+  bottom: max(1rem, env(safe-area-inset-bottom));
+  z-index: 40;
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: var(--acento);
+  box-shadow: var(--sombra-lg);
+  color: #fff;
+  font-size: 1.2rem;
+  font-weight: var(--peso-fuerte);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(10px);
+  transition: opacity var(--transicion), transform var(--transicion);
+}
+
+.arriba--visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: none;
+}
+
+.arriba:hover {
+  background: var(--acento-hover);
+}
+
+.pie__enlaces {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.4rem 1.2rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--texto-sm);
+}
+
+.pie__enlaces a {
+  color: var(--contenido-inverso-suave);
+}
+
+.pie__enlaces a:hover {
+  color: var(--acento-calido);
+}

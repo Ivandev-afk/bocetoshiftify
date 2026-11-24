@@ -85,7 +85,7 @@ $conexion->close();
   <meta name="theme-color" content="#0F172A">
   <title><?= $empresa ? "Turno en " . htmlspecialchars($empresa["nombre"]) : "Tu turno" ?> | Shiftify</title>
   <link rel="stylesheet" href="assets/css/tokens.css?v=6">
-  <link rel="stylesheet" href="assets/css/styles.css?v=11">
+  <link rel="stylesheet" href="assets/css/styles.css?v=12">
 </head>
 <body class="pagina-turno<?= $turno && $turno["estado"] === "atendiendo" && !$mostrarFormulario ? " pagina-turno--llamado" : "" ?>">
   <main class="turno">

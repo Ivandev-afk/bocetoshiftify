@@ -7,7 +7,7 @@
   <meta name="description" content="Shiftify convierte las filas en turnos digitales claros y fáciles de gestionar.">
   <title>Shiftify | La fila avanza</title>
   <link rel="stylesheet" href="assets/css/tokens.css?v=5">
-  <link rel="stylesheet" href="assets/css/styles.css?v=11">
+  <link rel="stylesheet" href="assets/css/styles.css?v=12">
 </head>
 <body class="pagina-inicio">
   <a class="salto" href="#contenido">Saltar al contenido</a>
@@ -251,9 +251,27 @@
       <a class="marca" href="#inicio" aria-label="Shiftify, volver al inicio">
         <img class="marca__imagen" src="assets/img/shiftify-logo.png" alt="Shiftify">
       </a>
-      <p>Turnos más claros. Atención más humana.</p>
+      <ul class="pie__enlaces" aria-label="Ir a">
+        <li><a href="#inicio">Inicio</a></li>
+        <li><a href="#como-funciona">Cómo funciona</a></li>
+        <li><a href="#planes">Planes</a></li>
+        <li><a href="turno.php?e=shiftify">Pedir turno</a></li>
+        <li><a href="pantallas/index.html">Pantallas</a></li>
+        <li><a href="login.php">Iniciar sesión</a></li>
+      </ul>
       <span>© 2026 Shiftify</span>
     </div>
   </footer>
+
+  <!-- Volver arriba: aparece al bajar por la página -->
+  <a class="arriba" href="#inicio" id="arriba" aria-label="Volver arriba" title="Volver arriba">↑</a>
+  <script>
+    (function () {
+      var boton = document.getElementById("arriba");
+      function revisar() { boton.classList.toggle("arriba--visible", window.scrollY > 600); }
+      window.addEventListener("scroll", revisar, { passive: true });
+      revisar();
+    })();
+  </script>
 </body>
 </html>
