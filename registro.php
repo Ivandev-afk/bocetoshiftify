@@ -90,7 +90,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
   <main class="login">
     <section class="login__visual" aria-label="Shiftify, gestión simple de turnos">
-      <a class="marca marca--inversa" href="index.html">
+      <a class="marca marca--inversa" href="./">
         <img class="marca__imagen" src="assets/img/shiftify-logo.png" alt="Shiftify">
       </a>
 
