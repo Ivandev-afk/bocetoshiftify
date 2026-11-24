@@ -60,9 +60,10 @@ if ($empresa) {
         }
     }
 
-    // Con caja elegida la atiende solo esa; sin caja, las abiertas atienden en paralelo
-    $cajasQueAtienden = $turno && $turno["caja_id"] !== null ? 1 : cajasAbiertas($conexion, $empresaId);
-    $minutos = $turno ? minutosDeEspera($turno["antes"] + 1, minutosPorTurno($conexion, $empresaId), $cajasQueAtienden) : 0;
+    // Con caja elegida la atiende solo esa, a su ritmo; sin caja, las abiertas en paralelo
+    $minutos = $turno
+        ? minutosEstimados(minutosPorCaja($conexion, $empresaId), $turno["antes"] + 1, $turno["caja_id"] !== null ? (int) $turno["caja_id"] : null, minutosBase($conexion, $empresaId))
+        : 0;
 
     // Para el formulario: cada caja con su estado y su fila
     $cajas = cajasParaElegir($conexion, $empresaId);

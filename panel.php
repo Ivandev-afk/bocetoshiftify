@@ -19,7 +19,7 @@ if ($liberadas = liberarCajasInactivas($conexion, $empresaId)) {
 
 // Las cajas, con su asesor, el turno que atienden y cuántos atendieron hoy
 $cajas = consultar($conexion, "
-    SELECT c.id, c.numero, c.usuario_id, u.nombre AS asesor,
+    SELECT c.id, c.numero, c.usuario_id, c.minutos, u.nombre AS asesor,
            t.numero AS turno, t.nombre, DATE_FORMAT(t.llamado, '%H:%i') AS hora,
            (SELECT COUNT(*) FROM turnos a
             WHERE a.caja_id = c.id AND a.estado = 'atendido' AND DATE(a.finalizado) = CURDATE()) AS atendidos,
@@ -39,7 +39,6 @@ foreach ($cajas as $caja) {
         $miCaja = $caja;
     }
 }
-$abiertas = max(1, count(array_filter($cajas, fn($c) => $c["usuario_id"] !== null)));
 
 // Personas en fila hoy, la más antigua primero.
 // Quien quedó esperando otro día ya se fue: no entra en la fila de hoy.
@@ -59,7 +58,9 @@ $hoy = consultar($conexion, "
     WHERE empresa_id = ? AND estado = 'atendido' AND DATE(finalizado) = CURDATE()
 ", "i", $empresaId)->fetch_assoc();
 
-$minutosPorTurno = minutosPorTurno($conexion, $empresaId);
+// Minutos por atención de cada caja abierta (real, del asesor o del negocio)
+$porCaja = minutosPorCaja($conexion, $empresaId);
+$minutosBase = minutosBase($conexion, $empresaId);
 $conexion->close();
 
 $esperando = count($fila);
@@ -76,7 +77,7 @@ $paginaActual = "panel";
   <meta name="theme-color" content="#0F172A">
   <title>Panel de atención | Shiftify</title>
   <link rel="stylesheet" href="assets/css/tokens.css?v=6">
-  <link rel="stylesheet" href="assets/css/styles.css?v=7">
+  <link rel="stylesheet" href="assets/css/styles.css?v=9">
 </head>
 <body class="pagina-panel">
   <a class="salto" href="#contenido">Saltar al contenido</a>
@@ -111,7 +112,7 @@ $paginaActual = "panel";
       </div>
       <div class="app-metrica">
         <span>Espera estimada</span>
-        <strong><?= minutosDeEspera($esperando, $minutosPorTurno, $abiertas) ?><small> min</small></strong>
+        <strong><?= minutosEstimados($porCaja, $esperando, null, $minutosBase) ?><small> min</small></strong>
       </div>
     </section>
 
@@ -146,6 +147,25 @@ $paginaActual = "panel";
               <p class="app-nota">Llamado a las <?= $caja["hora"] ?></p>
             <?php else: ?>
               <p class="app-caja__vacia"><?= $libre ? "Cerrada" : "Nadie en atención." ?></p>
+            <?php endif; ?>
+
+            <?php if (isset($porCaja[$caja["id"]])):
+                $ritmo = $porCaja[$caja["id"]];
+                $origen = ["real" => "promedio real de hoy", "asesor" => "lo puso el asesor", "base" => "valor del negocio"][$ritmo["origen"]];
+            ?>
+              <p class="app-nota app-caja__ritmo">~<?= $ritmo["minutos"] ?> min por atención · <?= $origen ?></p>
+            <?php endif; ?>
+
+            <?php if ($mia): ?>
+              <!-- El asesor dice cuánto tarda; con 3 atenciones hoy manda el promedio real -->
+              <form class="app-caja__minutos" action="turnos.php" method="POST">
+                <input type="hidden" name="accion" value="minutos_caja">
+                <input type="hidden" name="caja" value="<?= $caja["id"] ?>">
+                <label for="minutos-<?= $caja["id"] ?>">Mi atención dura</label>
+                <input id="minutos-<?= $caja["id"] ?>" name="minutos" type="number" min="<?= MINUTOS_MINIMOS_ATENCION ?>" max="<?= MINUTOS_MAXIMOS_EDITABLES ?>" value="<?= $caja["minutos"] ?? $minutosBase ?>" required>
+                <span>min</span>
+                <button class="boton boton--claro boton--pequeno" type="submit">Guardar</button>
+              </form>
             <?php endif; ?>
 
             <p class="app-caja__pie"><?= $caja["en_fila"] ?> en su fila · <?= $caja["atendidos"] ?> <?= $caja["atendidos"] == 1 ? "atendido" : "atendidos" ?> hoy</p>
@@ -212,6 +232,19 @@ $paginaActual = "panel";
                 <option value="<?= $caja["id"] ?>"><?= nombreCaja($caja["numero"]) ?> · <?= $caja["en_fila"] ?> en fila</option>
               <?php endforeach; ?>
             </select>
+          </form>
+        </section>
+
+        <section class="app-tarjeta" aria-labelledby="ritmo-titulo">
+          <h2 id="ritmo-titulo">Tiempo por atención</h2>
+          <p class="app-nota">Valor inicial del negocio para estimar la espera. Cada asesor puede poner el suyo en su caja, y con <?= ATENCIONES_PARA_PROMEDIO ?> atenciones en el día la caja usa su promedio real.</p>
+          <form class="app-formulario" action="turnos.php" method="POST">
+            <input type="hidden" name="accion" value="minutos_base">
+            <label for="minutos-base">Minutos por atención</label>
+            <div class="app-formulario__fila">
+              <input id="minutos-base" name="minutos" type="number" min="<?= MINUTOS_MINIMOS_ATENCION ?>" max="<?= MINUTOS_MAXIMOS_EDITABLES ?>" value="<?= $minutosBase ?>" required>
+              <button class="boton boton--claro" type="submit">Guardar</button>
+            </div>
           </form>
         </section>
 

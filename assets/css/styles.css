@@ -3203,3 +3203,28 @@ input:focus-visible {
 .turno-aviso__prueba[hidden] {
   display: none;
 }
+
+/* Tiempo por atención de cada caja */
+.app-caja__ritmo {
+  margin-top: var(--e-2);
+}
+
+.app-caja__minutos {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--e-2);
+  margin-top: var(--e-2);
+  font-size: var(--texto-sm);
+}
+
+.app-caja__minutos input {
+  width: 4.5rem;
+  min-height: 40px;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid var(--borde-fuerte);
+  border-radius: var(--radio-md);
+  background: var(--superficie-elevada);
+  color: var(--contenido-fuerte);
+  font: inherit;
+}

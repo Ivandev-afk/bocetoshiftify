@@ -12,6 +12,8 @@ CREATE TABLE IF NOT EXISTS empresas (
     id     INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
     slug   VARCHAR(60)  NOT NULL UNIQUE,
+    -- Minutos por atención para estimar la espera mientras no hay datos reales del día
+    minutos_base INT NOT NULL DEFAULT 10,
     creado TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -37,6 +39,8 @@ CREATE TABLE IF NOT EXISTS cajas (
     usuario_id INT NULL,
     -- Última vez que el panel del asesor estuvo abierto (para liberar cajas olvidadas)
     actividad  TIMESTAMP NULL,
+    -- Minutos que el asesor dice que tarda cada atención en su caja (null = el del negocio)
+    minutos    INT NULL,
     UNIQUE (empresa_id, numero),
     UNIQUE (usuario_id),
     FOREIGN KEY (empresa_id) REFERENCES empresas (id),

@@ -48,6 +48,26 @@ if ($accion === "crear") {
         $turno = crearTurno($conexion, $empresaId, $nombre, $cajaId);
         $_SESSION["aviso"] = "Turno " . codigoTurno($turno["numero"]) . " creado para $nombre.";
     }
+} elseif ($accion === "minutos_base") {
+    // Valor inicial del negocio para estimar la espera
+    $minutos = minutosValidos((string) ($_POST["minutos"] ?? ""));
+    if ($minutos === null) {
+        $_SESSION["error"] = "Escribe un tiempo entre " . MINUTOS_MINIMOS_ATENCION . " y " . MINUTOS_MAXIMOS_EDITABLES . " minutos.";
+    } else {
+        consultar($conexion, "UPDATE empresas SET minutos_base = ? WHERE id = ?", "ii", $minutos, $empresaId);
+        $_SESSION["aviso"] = "Tiempo por atención del negocio: $minutos min.";
+    }
+} elseif ($accion === "minutos_caja") {
+    // Lo que tarda el asesor en su caja; solo él lo cambia
+    $minutos = minutosValidos((string) ($_POST["minutos"] ?? ""));
+    if ($minutos === null) {
+        $_SESSION["error"] = "Escribe un tiempo entre " . MINUTOS_MINIMOS_ATENCION . " y " . MINUTOS_MAXIMOS_EDITABLES . " minutos.";
+    } elseif (!consultar($conexion, "SELECT id FROM cajas WHERE id = ? AND empresa_id = ? AND usuario_id = ?", "iii", $cajaId, $empresaId, $usuarioId)->fetch_assoc()) {
+        $_SESSION["error"] = "Solo puedes cambiar el tiempo de tu propia caja.";
+    } else {
+        consultar($conexion, "UPDATE cajas SET minutos = ? WHERE id = ?", "ii", $minutos, $cajaId);
+        $_SESSION["aviso"] = "Tu caja: ~$minutos min por atención.";
+    }
 } elseif (in_array($accion, ["tomar", "dejar", "liberar", "siguiente", "finalizar"], true)) {
     // Todo o nada. Bloquear la fila de la empresa ordena a los asesores que
     // actúan al mismo tiempo: uno termina antes de que empiece el otro.
