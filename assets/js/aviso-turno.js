@@ -4,8 +4,14 @@
 //   el permiso de sonido, que los navegadores solo dan tras un toque del usuario.
 // - Pre-aviso suave cuando queda 1 persona (o ninguna) antes.
 // - Al llamarlo: timbre, vibración, notificación del sistema y título parpadeando.
-// Limitaciones de los navegadores: el iPhone no vibra desde una página web, y si
-// el navegador se cierra o el celular lo suspende mucho tiempo, no se puede sonar.
+//
+// Por qué así:
+// - El sonido va en un <audio> (un WAV generado aquí) y no con Web Audio: en
+//   iPhone, Web Audio se calla con el interruptor de silencio y <audio> no.
+// - Mientras espera se pide mantener la pantalla encendida (Wake Lock): con la
+//   pantalla bloqueada el celular congela la página y no puede sonar.
+// Límites de los navegadores: el iPhone no vibra desde una página web, y si el
+// navegador se cierra no hay forma de sonar.
 (function () {
   const script = document.currentScript;
   const urlEstado = script.dataset.estadoUrl;
@@ -15,45 +21,83 @@
 
   const clavePreaviso = "shiftify-preaviso-" + turnoId;
   const tituloOriginal = document.title;
-  let audio = null;
+  let activado = false;
   let registroSw = null;
   let parpadeo = null;
+  let bloqueoPantalla = null;
 
   const $ = (id) => document.getElementById(id);
 
-  // ---------- Sonido (generado con Web Audio: no hace falta un archivo) ----------
-  function tono(frecuencia, inicio, duracion, volumen) {
-    const osc = audio.createOscillator();
-    const ganancia = audio.createGain();
-    const t = audio.currentTime + inicio;
-    osc.type = "sine";
-    osc.frequency.value = frecuencia;
-    ganancia.gain.setValueAtTime(0.0001, t);
-    ganancia.gain.exponentialRampToValueAtTime(volumen, t + 0.02);
-    ganancia.gain.exponentialRampToValueAtTime(0.0001, t + duracion);
-    osc.connect(ganancia).connect(audio.destination);
-    osc.start(t);
-    osc.stop(t + duracion + 0.05);
+  // ---------- Sonidos: WAV generados en el navegador (no hace falta subir archivos) ----------
+  // notas: [frecuencia, inicio (s), duración (s)]
+  function crearWav(notas, volumen) {
+    const muestras = 22050;
+    const total = Math.ceil(Math.max(...notas.map(([, i, d]) => i + d)) * muestras) + 1000;
+    const datos = new Float32Array(total);
+    for (const [frecuencia, inicio, duracion] of notas) {
+      const desde = Math.floor(inicio * muestras);
+      const largo = Math.floor(duracion * muestras);
+      for (let n = 0; n < largo; n++) {
+        const t = n / muestras;
+        const ataque = Math.min(1, n / 200);
+        const caida = Math.exp(-3 * t / duracion);
+        datos[desde + n] += Math.sin(2 * Math.PI * frecuencia * t) * ataque * caida * volumen;
+      }
+    }
+    const buffer = new ArrayBuffer(44 + total * 2);
+    const vista = new DataView(buffer);
+    const texto = (pos, s) => { for (let i = 0; i < s.length; i++) vista.setUint8(pos + i, s.charCodeAt(i)); };
+    texto(0, "RIFF"); vista.setUint32(4, 36 + total * 2, true); texto(8, "WAVE");
+    texto(12, "fmt "); vista.setUint32(16, 16, true); vista.setUint16(20, 1, true); vista.setUint16(22, 1, true);
+    vista.setUint32(24, muestras, true); vista.setUint32(28, muestras * 2, true);
+    vista.setUint16(32, 2, true); vista.setUint16(34, 16, true);
+    texto(36, "data"); vista.setUint32(40, total * 2, true);
+    for (let i = 0; i < total; i++) {
+      vista.setInt16(44 + i * 2, Math.max(-1, Math.min(1, datos[i])) * 32767, true);
+    }
+    const audio = new Audio(URL.createObjectURL(new Blob([buffer], { type: "audio/wav" })));
+    audio.preload = "auto";
+    return audio;
   }
 
-  function sonar(tipo) {
-    if (!audio) return;
-    audio.resume();
-    if (tipo === "timbre") {
-      // Ding-dong fuerte, tres veces
-      for (let i = 0; i < 3; i++) {
-        tono(1046, i * 1.6, 0.6, 0.6);
-        tono(784, i * 1.6 + 0.45, 0.9, 0.6);
-      }
-    } else {
-      // Dos pitidos suaves
-      tono(880, 0, 0.25, 0.3);
-      tono(880, 0.35, 0.25, 0.3);
-    }
+  // Ding-dong fuerte tres veces, y dos pitidos suaves para el pre-aviso
+  const timbre = crearWav([
+    [1046, 0, 0.6], [784, 0.45, 0.9],
+    [1046, 1.6, 0.6], [784, 2.05, 0.9],
+    [1046, 3.2, 0.6], [784, 3.65, 0.9],
+  ], 0.9);
+  const suave = crearWav([[880, 0, 0.25], [880, 0.35, 0.25]], 0.6);
+
+  function sonar(audio) {
+    if (!activado) return;
+    audio.currentTime = 0;
+    audio.play().catch(() => {});
+  }
+
+  // Un <audio> solo suena sin toque si antes sonó con uno: se "desbloquean" los dos
+  function desbloquearSonidos() {
+    timbre.muted = true;
+    timbre.play().then(() => {
+      timbre.pause();
+      timbre.currentTime = 0;
+      timbre.muted = false;
+    }).catch(() => { timbre.muted = false; });
+    suave.currentTime = 0;
+    return suave.play(); // este sí se oye: es la prueba de volumen
   }
 
   function vibrar(patron) {
     if (navigator.vibrate) navigator.vibrate(patron);
+  }
+
+  // ---------- Pantalla encendida mientras espera ----------
+  async function mantenerPantalla() {
+    if (!("wakeLock" in navigator) || document.hidden) return;
+    try {
+      bloqueoPantalla = await navigator.wakeLock.request("screen");
+    } catch (e) {
+      // Batería baja o navegador que no lo permite: se sigue sin él
+    }
   }
 
   // ---------- Notificación del sistema (sirve aunque esté en otra app) ----------
@@ -87,12 +131,15 @@
     if (!document.hidden) {
       clearInterval(parpadeo);
       document.title = tituloOriginal;
+      // El navegador suelta el bloqueo de pantalla al salir: se pide otra vez
+      if (activado) mantenerPantalla();
       revisar();
     }
   });
 
-  // ---------- Botón «Activar aviso con sonido» ----------
+  // ---------- Botones «Activar aviso» y «Probar sonido» ----------
   const boton = $("activar-aviso");
+  const botonPrueba = $("probar-sonido");
   const textoAviso = $("aviso-estado");
 
   if ("serviceWorker" in navigator) {
@@ -101,17 +148,20 @@
 
   if (boton) {
     boton.addEventListener("click", () => {
-      try {
-        audio = audio || new (window.AudioContext || window.webkitAudioContext)();
-      } catch (e) {
-        audio = null;
-      }
-      sonar("suave"); // prueba: el cliente oye cómo sonará
+      activado = true;
+      desbloquearSonidos().then(() => {
+        textoAviso.textContent = "¿Oíste el pitido? Si no, sube el volumen" +
+          (/iPhone|iPad/.test(navigator.userAgent) ? " y quita el modo silencio." : " multimedia.") +
+          " Deja esta página abierta con la pantalla encendida.";
+      }).catch(() => {
+        textoAviso.textContent = "Tu navegador no dejó sonar. Toca «Probar sonido».";
+      });
       vibrar(150);
+      mantenerPantalla();
 
       boton.disabled = true;
       boton.textContent = "✓ Aviso activado";
-      textoAviso.textContent = "Deja esta página abierta: sonará cuando estés cerca y cuando te llamen.";
+      if (botonPrueba) botonPrueba.hidden = false;
 
       if ("Notification" in window && Notification.permission === "default") {
         Notification.requestPermission();
@@ -122,13 +172,21 @@
     });
   }
 
+  if (botonPrueba) {
+    botonPrueba.addEventListener("click", () => {
+      timbre.currentTime = 0;
+      timbre.play().catch(() => {});
+      vibrar([300, 100, 300]);
+    });
+  }
+
   // ---------- Pre-aviso y llamado ----------
   function preaviso(datos) {
     if (sessionStorage.getItem(clavePreaviso)) return;
     sessionStorage.setItem(clavePreaviso, "1");
 
     const cuerpo = datos.antes === 0 ? "¡Eres el siguiente! Acércate." : "Solo 1 persona antes de ti. Acércate.";
-    sonar("suave");
+    sonar(suave);
     vibrar([200, 100, 200]);
     notificar("¡Ya casi! " + datos.codigo, cuerpo + " · " + negocio);
     if (document.hidden) parpadear("⏳ ¡Ya casi!");
@@ -136,7 +194,7 @@
 
   function llamado(datos) {
     const caja = datos.caja || "ventanilla";
-    sonar("timbre");
+    sonar(timbre);
     vibrar([600, 200, 600, 200, 900]);
     notificar("🔔 ¡Te toca! " + datos.codigo, "Acércate a la " + caja + " · " + negocio);
     parpadear("🔔 ¡Te toca!");
@@ -185,7 +243,7 @@
       if (datos.estado === "esperando") {
         pintar(datos);
         // Solo con el aviso activado: si no, se guardaría como dado sin haber sonado
-        if (datos.antes <= 1 && audio) preaviso(datos);
+        if (datos.antes <= 1 && activado) preaviso(datos);
       }
     } catch (e) {
       // Sin conexión un momento: se reintenta en la próxima vuelta
