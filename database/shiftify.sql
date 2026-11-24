@@ -63,7 +63,11 @@ CREATE TABLE IF NOT EXISTS turnos (
     finalizado TIMESTAMP NULL,
     UNIQUE (empresa_id, numero),
     FOREIGN KEY (empresa_id) REFERENCES empresas (id),
-    FOREIGN KEY (caja_id) REFERENCES cajas (id)
+    FOREIGN KEY (caja_id) REFERENCES cajas (id),
+    -- Para que la fila de hoy no revise todo el historial (ver indices.sql)
+    INDEX idx_turnos_fila (empresa_id, estado, creado),
+    INDEX idx_turnos_fin  (empresa_id, estado, finalizado),
+    INDEX idx_turnos_caja (caja_id, estado, llamado)
 );
 
 -- Empresa y usuario de prueba: admin@shiftify.co / Shiftify2026
