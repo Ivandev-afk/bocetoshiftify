@@ -7,7 +7,7 @@
   <meta name="description" content="Shiftify convierte las filas en turnos digitales claros y fáciles de gestionar.">
   <title>Shiftify | La fila avanza</title>
   <link rel="stylesheet" href="assets/css/tokens.css?v=5">
-  <link rel="stylesheet" href="assets/css/styles.css?v=10">
+  <link rel="stylesheet" href="assets/css/styles.css?v=11">
 </head>
 <body class="pagina-inicio">
   <a class="salto" href="#contenido">Saltar al contenido</a>
@@ -21,6 +21,7 @@
       <nav class="nav" aria-label="Navegación principal">
         <a href="#experiencia">Experiencia</a>
         <a href="#como-funciona">Cómo funciona</a>
+        <a href="#planes">Planes</a>
         <a href="pantallas/index.html">Pantallas</a>
       </nav>
 
@@ -183,6 +184,52 @@
           <p>Abre la cámara del celular y apunta al código para entrar a la fila.</p>
           <a class="qr-modal__enlace" href="turno.php?e=shiftify">O abre la página aquí <span aria-hidden="true">→</span></a>
         </div>
+      </div>
+    </section>
+
+    <!-- Planes de suscripción: cada botón abre WhatsApp con el plan ya escrito -->
+    <section class="home-planes" id="planes" aria-labelledby="planes-titulo">
+      <div class="contenedor">
+        <div class="home-valor__encabezado">
+          <p class="home-mini-etiqueta">PLANES DE SUSCRIPCIÓN</p>
+          <h2 id="planes-titulo">Elige cómo empezar.<br><span>Todo incluido en los tres.</span></h2>
+        </div>
+
+        <div class="home-planes__grilla">
+          <article class="home-plan">
+            <h3 class="home-plan__nombre">Mensual</h3>
+            <p class="home-plan__texto">Para el negocio que quiere probar sin compromiso largo.</p>
+            <p class="home-plan__precio"><strong>$49.900</strong><span>/ mes</span></p>
+            <p class="home-plan__detalle">Pagas mes a mes y cancelas cuando quieras.</p>
+            <a class="home-plan__boton" href="https://api.whatsapp.com/send?phone=573027852641&amp;text=Hola%2C%20quiero%20el%20plan%20Mensual%20de%20Shiftify%20para%20mi%20negocio." target="_blank" rel="noopener">Quiero el Mensual <span aria-hidden="true">↗</span></a>
+          </article>
+
+          <article class="home-plan">
+            <h3 class="home-plan__nombre">Semestral</h3>
+            <p class="home-plan__texto">Ahorro frente a seis pagos mensuales.</p>
+            <p class="home-plan__precio"><strong>$249.900</strong><span>/ 6 meses</span></p>
+            <p class="home-plan__detalle">≈ $41.650 al mes · <b>ahorras $49.500</b></p>
+            <a class="home-plan__boton" href="https://api.whatsapp.com/send?phone=573027852641&amp;text=Hola%2C%20quiero%20el%20plan%20Semestral%20de%20Shiftify%20para%20mi%20negocio." target="_blank" rel="noopener">Quiero el Semestral <span aria-hidden="true">↗</span></a>
+          </article>
+
+          <article class="home-plan home-plan--destacado">
+            <span class="home-plan__sello">Mejor precio</span>
+            <h3 class="home-plan__nombre">Anual</h3>
+            <p class="home-plan__texto">El menor valor por mes para clientes fieles.</p>
+            <p class="home-plan__precio"><strong>$499.000</strong><span>/ año</span></p>
+            <p class="home-plan__detalle">≈ $41.583 al mes · <b>ahorras $99.800</b></p>
+            <a class="home-plan__boton" href="https://api.whatsapp.com/send?phone=573027852641&amp;text=Hola%2C%20quiero%20el%20plan%20Anual%20de%20Shiftify%20para%20mi%20negocio." target="_blank" rel="noopener">Quiero el Anual <span aria-hidden="true">↗</span></a>
+          </article>
+        </div>
+
+        <ul class="home-planes__incluye" aria-label="Incluido en todos los planes">
+          <li>Turnos por QR sin límite</li>
+          <li>4 cajas y asesores ilimitados</li>
+          <li>El cliente elige su caja</li>
+          <li>Avisos con sonido y pre-aviso</li>
+          <li>Panel en vivo y tiempo estimado</li>
+          <li>Soporte por WhatsApp</li>
+        </ul>
       </div>
     </section>
 

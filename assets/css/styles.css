@@ -3243,3 +3243,189 @@ input:focus-visible {
 a.home-sucursal__icono {
   text-decoration: none;
 }
+
+/* Planes de suscripción en la portada */
+.home-planes {
+  padding-block: clamp(4.5rem, 8vw, 7rem);
+  background: var(--superficie-elevada);
+}
+
+.home-planes__grilla {
+  display: grid;
+  gap: 1rem;
+  margin-top: var(--e-7);
+}
+
+@media (min-width: 860px) {
+  .home-planes__grilla {
+    grid-template-columns: repeat(3, 1fr);
+    align-items: stretch;
+  }
+}
+
+.home-plan {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 1.6rem 1.4rem;
+  border: 1px solid var(--borde);
+  border-top: 4px solid var(--acento-calido);
+  border-radius: 18px;
+  background: var(--superficie-base);
+  transition: transform var(--transicion), box-shadow var(--transicion);
+}
+
+.home-plan:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--sombra-lg);
+}
+
+.home-plan__nombre {
+  color: var(--acento);
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-fuerte);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.home-plan__texto {
+  margin-top: var(--e-2);
+  color: var(--contenido-medio);
+  font-size: var(--texto-sm);
+}
+
+.home-plan__precio {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  margin-top: var(--e-5);
+}
+
+.home-plan__precio strong {
+  font-size: clamp(2rem, 4vw, 2.6rem);
+  font-weight: var(--peso-fuerte);
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.home-plan__precio span,
+.home-plan__detalle {
+  color: var(--contenido-suave);
+  font-size: var(--texto-sm);
+}
+
+.home-plan__detalle {
+  margin-top: var(--e-2);
+}
+
+.home-plan__detalle b {
+  color: var(--dato-positivo);
+}
+
+.home-plan__boton {
+  display: inline-flex;
+  min-height: 48px;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  margin-top: auto;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--borde-fuerte);
+  border-radius: var(--radio-md);
+  color: var(--contenido-fuerte);
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-fuerte);
+  transition: background-color var(--transicion), border-color var(--transicion);
+}
+
+.home-plan__detalle + .home-plan__boton {
+  margin-top: var(--e-5);
+}
+
+.home-plan__boton:hover {
+  border-color: var(--acento);
+  color: var(--acento);
+}
+
+/* El anual, destacado como en «Cómo funciona» */
+.home-plan--destacado {
+  border-color: var(--superficie-oscura);
+  border-top-color: var(--acento-calido);
+  background: var(--superficie-oscura);
+  color: var(--contenido-inverso);
+}
+
+.home-plan--destacado .home-plan__nombre {
+  color: var(--acento-calido);
+}
+
+.home-plan--destacado .home-plan__texto,
+.home-plan--destacado .home-plan__precio span,
+.home-plan--destacado .home-plan__detalle {
+  color: var(--contenido-inverso-suave);
+}
+
+.home-plan--destacado .home-plan__detalle b {
+  color: var(--acento-calido);
+}
+
+.home-plan--destacado .home-plan__boton {
+  border-color: var(--acento-calido);
+  background: var(--acento-calido);
+  color: var(--azul-oscuro);
+}
+
+.home-plan--destacado .home-plan__boton:hover {
+  background: color-mix(in srgb, var(--acento-calido) 88%, white);
+  color: var(--azul-oscuro);
+}
+
+.home-plan__sello {
+  position: absolute;
+  top: 1.2rem;
+  right: 1.2rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: var(--radio-full);
+  background: var(--acento-calido);
+  color: var(--azul-oscuro);
+  font-size: 0.7rem;
+  font-weight: var(--peso-fuerte);
+}
+
+.home-planes__incluye {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.6rem 1.4rem;
+  margin: var(--e-6) auto 0;
+  padding: 0;
+  color: var(--contenido-medio);
+  font-size: var(--texto-sm);
+  list-style: none;
+}
+
+.home-planes__incluye li::before {
+  content: "✓ ";
+  color: var(--dato-positivo);
+  font-weight: var(--peso-fuerte);
+}
+
+/* Volver al inicio desde la página del turno */
+.turno__volver {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: var(--e-3);
+  color: var(--contenido-suave);
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-semi);
+}
+
+.turno__volver:hover {
+  color: var(--acento);
+}
+
+.turno__arriba {
+  display: flex;
+  justify-content: flex-start;
+}

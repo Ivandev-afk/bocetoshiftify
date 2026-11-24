@@ -85,11 +85,16 @@ $conexion->close();
   <meta name="theme-color" content="#0F172A">
   <title><?= $empresa ? "Turno en " . htmlspecialchars($empresa["nombre"]) : "Tu turno" ?> | Shiftify</title>
   <link rel="stylesheet" href="assets/css/tokens.css?v=6">
-  <link rel="stylesheet" href="assets/css/styles.css?v=10">
+  <link rel="stylesheet" href="assets/css/styles.css?v=11">
 </head>
 <body class="pagina-turno<?= $turno && $turno["estado"] === "atendiendo" && !$mostrarFormulario ? " pagina-turno--llamado" : "" ?>">
   <main class="turno">
     <article class="turno__tarjeta">
+      <!-- Siempre a mano: salir sin pedir turno, o si la página no carga.
+           Salir no cancela el turno: al volver con el QR sigue en su lugar. -->
+      <div class="turno__arriba">
+        <a class="turno__volver" href="index.html"><span aria-hidden="true">←</span> Volver al inicio</a>
+      </div>
       <img class="marca__imagen" src="assets/img/shiftify-logo.png" alt="Shiftify">
 
       <?php if ($empresa): ?>
