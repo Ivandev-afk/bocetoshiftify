@@ -21,6 +21,12 @@ if ($empresa) {
     // Antes de mostrar cajas: una caja abandonada no se ofrece ni retiene a nadie
     liberarCajasInactivas($conexion, $empresaId);
     $esta = "turno.php?e=" . urlencode($empresa["slug"]);
+    // Llegó desde «Probar demo» de la portada: se recuerda para mostrar el aviso
+    // en todas las pantallas (los formularios vuelven sin ?demo=1)
+    if (isset($_GET["demo"])) {
+        $_SESSION["demo"][$empresaId] = true;
+    }
+    $esDemo = !empty($_SESSION["demo"][$empresaId]);
     $turno = turnoDeLaSesion($conexion, $empresaId);
 
     if ($_SERVER["REQUEST_METHOD"] === "POST") {
@@ -85,7 +91,7 @@ $conexion->close();
   <meta name="theme-color" content="#0F172A">
   <title><?= $empresa ? "Turno en " . htmlspecialchars($empresa["nombre"]) : "Tu turno" ?> | Shiftify</title>
   <link rel="stylesheet" href="assets/css/tokens.css?v=6">
-  <link rel="stylesheet" href="assets/css/styles.css?v=12">
+  <link rel="stylesheet" href="assets/css/styles.css?v=13">
 </head>
 <body class="pagina-turno<?= $turno && $turno["estado"] === "atendiendo" && !$mostrarFormulario ? " pagina-turno--llamado" : "" ?>">
   <main class="turno">
@@ -99,6 +105,9 @@ $conexion->close();
 
       <?php if ($empresa): ?>
         <!-- En todas las pantallas: la persona siempre sabe en qué negocio está su turno -->
+        <?php if (!empty($esDemo)): ?>
+          <p class="turno__demo" role="note"><strong>Esto es una demostración.</strong> Así lo viven los clientes de tu negocio cuando escanean tu QR. <a href="index.html#planes">Ver planes</a></p>
+        <?php endif; ?>
         <p class="turno__negocio"><span>Estás en la fila de</span> <strong><?= htmlspecialchars($empresa["nombre"]) ?></strong></p>
       <?php endif; ?>
 
