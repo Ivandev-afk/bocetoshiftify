@@ -1818,6 +1818,51 @@ input:focus-visible {
   color: var(--dato-positivo);
 }
 
+/* Botón para activar el aviso con sonido mientras espera */
+.turno-aviso {
+  margin-top: var(--e-5);
+  padding: var(--e-4);
+  border: 1px dashed var(--borde-fuerte);
+  border-radius: 12px;
+}
+
+.turno-aviso__boton {
+  width: 100%;
+}
+
+.turno-aviso__boton:disabled {
+  opacity: 1;
+  background: color-mix(in srgb, var(--dato-positivo) 12%, var(--superficie-elevada));
+  color: var(--dato-positivo);
+  box-shadow: none;
+  cursor: default;
+}
+
+/* Lo llamaron: la pantalla entera en verde para verla de lejos */
+.pagina-turno--llamado {
+  background: var(--positivo);
+  animation: turno-llamado 1s ease-in-out 6 alternate;
+}
+
+.turno__llamado {
+  color: var(--positivo-texto);
+  font-size: clamp(2.25rem, 12vw, 3rem);
+  font-weight: var(--peso-fuerte);
+  letter-spacing: -0.03em;
+}
+
+.pagina-turno--llamado .turno__estado--ahora {
+  font-size: var(--texto-lg);
+}
+
+@keyframes turno-llamado {
+  to { background: var(--positivo-texto); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pagina-turno--llamado { animation: none; }
+}
+
 .turno__datos {
   display: grid;
   grid-template-columns: 1fr 1fr;
