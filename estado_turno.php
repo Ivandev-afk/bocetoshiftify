@@ -26,9 +26,8 @@ if (!$turno) {
     exit;
 }
 
-$cajasQueAtienden = $turno["caja_id"] !== null ? 1 : cajasAbiertas($conexion, $empresaId);
 $minutos = $turno["estado"] === "esperando"
-    ? minutosDeEspera($turno["antes"] + 1, minutosPorTurno($conexion, $empresaId), $cajasQueAtienden)
+    ? minutosEstimados(minutosPorCaja($conexion, $empresaId), $turno["antes"] + 1, $turno["caja_id"] !== null ? (int) $turno["caja_id"] : null, minutosBase($conexion, $empresaId))
     : 0;
 $conexion->close();
 

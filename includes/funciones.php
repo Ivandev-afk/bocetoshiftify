@@ -85,32 +85,82 @@ function crearCajas(mysqli $conexion, int $empresaId): void
     $stmt->close();
 }
 
-// Cajas con un asesor atendiendo (al menos 1, para poder estimar la espera)
-function cajasAbiertas(mysqli $conexion, int $empresaId): int
-{
-    $abiertas = consultar($conexion, "SELECT COUNT(*) AS n FROM cajas WHERE empresa_id = ? AND usuario_id IS NOT NULL", "i", $empresaId)->fetch_assoc()["n"];
+// Límites de los minutos que escribe la gente
+const MINUTOS_MINIMOS_ATENCION = 1;
+const MINUTOS_MAXIMOS_EDITABLES = 120;
 
-    return max(1, (int) $abiertas);
+// Con cuántas atenciones terminadas hoy una caja ya usa su promedio real
+const ATENCIONES_PARA_PROMEDIO = 3;
+
+// Minutos por atención de cada caja abierta, y de dónde sale ese número:
+//   1. "real"   → promedio de sus atenciones de hoy, si ya tiene al menos 3
+//   2. "asesor" → lo que el asesor dijo al tomar la caja
+//   3. "base"   → el valor inicial del negocio
+// Devuelve [caja_id => ["minutos" => int, "origen" => string]]
+function minutosPorCaja(mysqli $conexion, int $empresaId): array
+{
+    $filas = consultar($conexion, "
+        SELECT c.id, c.minutos, e.minutos_base,
+               COUNT(t.id) AS atenciones,
+               AVG(LEAST(TIMESTAMPDIFF(SECOND, t.llamado, t.finalizado), ?)) AS segundos
+        FROM cajas c
+        JOIN empresas e ON e.id = c.empresa_id
+        LEFT JOIN turnos t ON t.caja_id = c.id AND t.estado = 'atendido' AND DATE(t.llamado) = CURDATE()
+        WHERE c.empresa_id = ? AND c.usuario_id IS NOT NULL
+        GROUP BY c.id, c.minutos, e.minutos_base
+    ", "ii", MINUTOS_MAXIMOS_ATENCION * 60, $empresaId)->fetch_all(MYSQLI_ASSOC);
+
+    $resultado = [];
+    foreach ($filas as $fila) {
+        if ($fila["atenciones"] >= ATENCIONES_PARA_PROMEDIO) {
+            $resultado[(int) $fila["id"]] = ["minutos" => max(1, (int) round($fila["segundos"] / 60)), "origen" => "real"];
+        } elseif ($fila["minutos"] !== null) {
+            $resultado[(int) $fila["id"]] = ["minutos" => (int) $fila["minutos"], "origen" => "asesor"];
+        } else {
+            $resultado[(int) $fila["id"]] = ["minutos" => (int) $fila["minutos_base"], "origen" => "base"];
+        }
+    }
+
+    return $resultado;
 }
 
-// Duración media de una atención hoy en la empresa, en minutos (5 si aún no hay datos).
-// Solo cuentan las atenciones que empezaron hoy, y cada una con un tope de 60 min.
-function minutosPorTurno(mysqli $conexion, int $empresaId): int
+// Valor inicial del negocio (se usa si no hay ninguna caja abierta)
+function minutosBase(mysqli $conexion, int $empresaId): int
 {
-    $segundos = consultar($conexion, "
-        SELECT AVG(LEAST(TIMESTAMPDIFF(SECOND, llamado, finalizado), ?)) AS segundos
-        FROM turnos
-        WHERE empresa_id = ? AND estado = 'atendido' AND DATE(llamado) = CURDATE()
-    ", "ii", MINUTOS_MAXIMOS_ATENCION * 60, $empresaId)->fetch_assoc()["segundos"];
-
-    return $segundos !== null ? max(1, (int) round($segundos / 60)) : 5;
+    return (int) consultar($conexion, "SELECT minutos_base FROM empresas WHERE id = ?", "i", $empresaId)->fetch_assoc()["minutos_base"];
 }
 
 // Minutos que esperará quien tiene $personas por delante (incluida ella misma).
-// Las cajas abiertas atienden en paralelo: con 2 cajas, 4 personas son 2 rondas.
-function minutosDeEspera(int $personas, int $minutosPorTurno, int $cajas): int
+// - Con caja elegida: solo esa caja la atiende, a su ritmo.
+// - Sin caja: las cajas abiertas atienden en paralelo, cada una a su ritmo.
+//   Una caja de 5 min y otra de 10 atienden juntas 1/5 + 1/10 = 0,3 personas por minuto.
+function minutosEstimados(array $porCaja, int $personas, ?int $cajaId, int $minutosBase): int
 {
-    return (int) ceil($personas / max(1, $cajas)) * $minutosPorTurno;
+    if ($personas <= 0) {
+        return 0;
+    }
+    if ($cajaId !== null && isset($porCaja[$cajaId])) {
+        return $personas * $porCaja[$cajaId]["minutos"];
+    }
+    if (!$porCaja) {
+        // Nadie atiende ahora: se estima como si abriera una caja
+        return $personas * $minutosBase;
+    }
+
+    $personasPorMinuto = 0;
+    foreach ($porCaja as $caja) {
+        $personasPorMinuto += 1 / max(1, $caja["minutos"]);
+    }
+
+    return (int) ceil($personas / $personasPorMinuto);
+}
+
+// Minutos válidos escritos en un formulario, o null si no valen
+function minutosValidos(string $valor): ?int
+{
+    $minutos = filter_var($valor, FILTER_VALIDATE_INT);
+
+    return $minutos !== false && $minutos >= MINUTOS_MINIMOS_ATENCION && $minutos <= MINUTOS_MAXIMOS_EDITABLES ? $minutos : null;
 }
 
 // Código visible de la caja: 2 → "Caja 2"
@@ -136,7 +186,7 @@ function soltarCaja(mysqli $conexion, int $cajaId): void
 {
     consultar($conexion, "UPDATE turnos SET estado = 'atendido', finalizado = NOW() WHERE caja_id = ? AND estado = 'atendiendo'", "i", $cajaId);
     consultar($conexion, "UPDATE turnos SET caja_id = NULL WHERE caja_id = ? AND estado = 'esperando'", "i", $cajaId);
-    consultar($conexion, "UPDATE cajas SET usuario_id = NULL, actividad = NULL WHERE id = ?", "i", $cajaId);
+    consultar($conexion, "UPDATE cajas SET usuario_id = NULL, actividad = NULL, minutos = NULL WHERE id = ?", "i", $cajaId);
 }
 
 // Libera las cajas de la empresa cuyo asesor se fue sin pulsar «Dejar caja»
