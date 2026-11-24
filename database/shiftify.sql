@@ -35,6 +35,8 @@ CREATE TABLE IF NOT EXISTS cajas (
     empresa_id INT NOT NULL,
     numero     INT NOT NULL,
     usuario_id INT NULL,
+    -- Última vez que el panel del asesor estuvo abierto (para liberar cajas olvidadas)
+    actividad  TIMESTAMP NULL,
     UNIQUE (empresa_id, numero),
     UNIQUE (usuario_id),
     FOREIGN KEY (empresa_id) REFERENCES empresas (id),

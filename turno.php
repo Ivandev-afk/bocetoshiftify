@@ -50,6 +50,8 @@ function turnoDeLaSesion(mysqli $conexion, int $empresaId): ?array
 
 if ($empresa) {
     $empresaId = (int) $empresa["id"];
+    // Antes de mostrar cajas: una caja abandonada no se ofrece ni retiene a nadie
+    liberarCajasInactivas($conexion, $empresaId);
     $esta = "turno.php?e=" . urlencode($empresa["slug"]);
     $turno = turnoDeLaSesion($conexion, $empresaId);
 

@@ -48,7 +48,7 @@ if ($accion === "crear") {
         $turno = crearTurno($conexion, $empresaId, $nombre, $cajaId);
         $_SESSION["aviso"] = "Turno " . codigoTurno($turno["numero"]) . " creado para $nombre.";
     }
-} elseif (in_array($accion, ["tomar", "dejar", "siguiente", "finalizar"], true)) {
+} elseif (in_array($accion, ["tomar", "dejar", "liberar", "siguiente", "finalizar"], true)) {
     // Todo o nada. Bloquear la fila de la empresa ordena a los asesores que
     // actúan al mismo tiempo: uno termina antes de que empiece el otro.
     $conexion->begin_transaction();
@@ -69,8 +69,16 @@ if ($accion === "crear") {
         } elseif ($otra) {
             $_SESSION["error"] = "Ya atiendes en " . nombreCaja($otra["numero"]) . ". Déjala antes de tomar otra.";
         } else {
-            consultar($conexion, "UPDATE cajas SET usuario_id = ? WHERE id = ?", "ii", $usuarioId, $caja["id"]);
+            consultar($conexion, "UPDATE cajas SET usuario_id = ?, actividad = NOW() WHERE id = ?", "ii", $usuarioId, $caja["id"]);
             $_SESSION["aviso"] = "Tomaste " . nombreCaja($caja["numero"]) . ". Ya puedes llamar turnos.";
+        }
+    } elseif ($accion === "liberar") {
+        // Para la caja de un asesor que se fue sin dejarla (otro la libera desde su panel)
+        if ($caja["usuario_id"] === null) {
+            $_SESSION["aviso"] = nombreCaja($caja["numero"]) . " ya estaba libre.";
+        } else {
+            soltarCaja($conexion, $caja["id"]);
+            $_SESSION["aviso"] = "Liberaste " . nombreCaja($caja["numero"]) . ". Quienes esperaban en ella pasaron a «la primera libre».";
         }
     } elseif (!$esMia) {
         // Solo quien tomó la caja la opera
@@ -79,10 +87,9 @@ if ($accion === "crear") {
         if (atendiendoEn($conexion, $caja["id"])) {
             $_SESSION["error"] = "Finaliza la atención antes de dejar " . nombreCaja($caja["numero"]) . ".";
         } else {
-            consultar($conexion, "UPDATE cajas SET usuario_id = NULL WHERE id = ?", "i", $caja["id"]);
             // Quien esperaba en esta caja no se queda atascado: pasa a «la primera libre»,
             // sin perder su lugar (el orden es por número de turno)
-            consultar($conexion, "UPDATE turnos SET caja_id = NULL WHERE caja_id = ? AND estado = 'esperando'", "i", $caja["id"]);
+            soltarCaja($conexion, $caja["id"]);
             $_SESSION["aviso"] = "Dejaste " . nombreCaja($caja["numero"]) . ".";
         }
     } else {
@@ -107,6 +114,9 @@ if ($accion === "crear") {
 
     $conexion->commit();
 }
+
+// Cualquier acción cuenta como actividad del asesor en su caja
+marcarActividad($conexion, $usuarioId);
 
 $conexion->close();
 

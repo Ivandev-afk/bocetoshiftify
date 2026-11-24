@@ -119,6 +119,53 @@ function nombreCaja(int $numero): string
     return "Caja $numero";
 }
 
+// Una caja cuyo panel lleva este tiempo cerrado se libera sola.
+// El panel abierto se recarga cada 20 s, así que un asesor presente nunca llega.
+const MINUTOS_CAJA_INACTIVA = 15;
+
+// El asesor sigue en su caja: el panel avisa en cada recarga
+function marcarActividad(mysqli $conexion, int $usuarioId): void
+{
+    consultar($conexion, "UPDATE cajas SET actividad = NOW() WHERE usuario_id = ?", "i", $usuarioId);
+}
+
+// Suelta una caja: cierra la atención en curso, deja la caja sin asesor y pasa
+// a «la primera libre» a quien esperaba en ella, sin perder su lugar en la fila.
+// Usar dentro de una transacción que ya bloqueó la empresa.
+function soltarCaja(mysqli $conexion, int $cajaId): void
+{
+    consultar($conexion, "UPDATE turnos SET estado = 'atendido', finalizado = NOW() WHERE caja_id = ? AND estado = 'atendiendo'", "i", $cajaId);
+    consultar($conexion, "UPDATE turnos SET caja_id = NULL WHERE caja_id = ? AND estado = 'esperando'", "i", $cajaId);
+    consultar($conexion, "UPDATE cajas SET usuario_id = NULL, actividad = NULL WHERE id = ?", "i", $cajaId);
+}
+
+// Libera las cajas de la empresa cuyo asesor se fue sin pulsar «Dejar caja»
+// (cerró el celular, se le acabó la batería…). Devuelve cuántas liberó.
+function liberarCajasInactivas(mysqli $conexion, int $empresaId): int
+{
+    $sql = "
+        SELECT id FROM cajas
+        WHERE empresa_id = ? AND usuario_id IS NOT NULL
+          AND (actividad IS NULL OR actividad < NOW() - INTERVAL ? MINUTE)
+    ";
+
+    // Consulta rápida sin bloquear: casi siempre no hay ninguna
+    if (!consultar($conexion, $sql, "ii", $empresaId, MINUTOS_CAJA_INACTIVA)->fetch_assoc()) {
+        return 0;
+    }
+
+    // Se vuelve a mirar con la empresa bloqueada: el asesor pudo volver justo ahora
+    $conexion->begin_transaction();
+    consultar($conexion, "SELECT id FROM empresas WHERE id = ? FOR UPDATE", "i", $empresaId);
+    $inactivas = consultar($conexion, $sql, "ii", $empresaId, MINUTOS_CAJA_INACTIVA)->fetch_all(MYSQLI_ASSOC);
+    foreach ($inactivas as $caja) {
+        soltarCaja($conexion, (int) $caja["id"]);
+    }
+    $conexion->commit();
+
+    return count($inactivas);
+}
+
 // Cajas de la empresa para elegir al pedir turno: si están abiertas (tienen asesor)
 // y cuántas personas esperan hoy en la fila propia de cada una
 function cajasParaElegir(mysqli $conexion, int $empresaId): array
