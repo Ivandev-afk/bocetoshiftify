@@ -19,6 +19,7 @@ const DESTINO = RAIZ . "/pantallas";
 // Enlaces de la aplicación → maqueta equivalente
 const ENLACES = [
     "index.html"   => "../index.html",
+    "./"           => "../",
     "login.php"    => "login.html",
     "registro.php" => "registro.html",
     "panel.php"    => "panel.html",

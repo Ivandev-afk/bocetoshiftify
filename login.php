@@ -68,7 +68,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
   <main class="login">
     <section class="login__visual" aria-label="Shiftify, gestión simple de turnos">
-      <a class="marca marca--inversa" href="index.html">
+      <a class="marca marca--inversa" href="./">
         <img class="marca__imagen" src="assets/img/shiftify-logo.png" alt="Shiftify">
       </a>
 
@@ -88,7 +88,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     <section class="login__panel" id="acceso">
       <div class="login__panel-interior">
-        <a class="login__volver" href="index.html"><span aria-hidden="true">←</span> Volver al inicio</a>
+        <a class="login__volver" href="./"><span aria-hidden="true">←</span> Volver al inicio</a>
 
         <div class="login__formulario">
           <p class="sobrelinea">Bienvenido de nuevo</p>

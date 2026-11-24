@@ -8,7 +8,7 @@ $pestanas = [
 ?>
 <header class="barra">
   <div class="contenedor barra__interior">
-    <a class="marca" href="index.html" aria-label="Shiftify, inicio">
+    <a class="marca" href="./" aria-label="Shiftify, inicio">
       <img class="marca__imagen" src="assets/img/shiftify-logo.png" alt="Shiftify">
     </a>
 

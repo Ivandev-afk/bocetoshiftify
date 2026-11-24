@@ -99,14 +99,14 @@ $conexion->close();
       <!-- Siempre a mano: salir sin pedir turno, o si la página no carga.
            Salir no cancela el turno: al volver con el QR sigue en su lugar. -->
       <div class="turno__arriba">
-        <a class="turno__volver" href="index.html"><span aria-hidden="true">←</span> Volver al inicio</a>
+        <a class="turno__volver" href="./"><span aria-hidden="true">←</span> Volver al inicio</a>
       </div>
       <img class="marca__imagen" src="assets/img/shiftify-logo.png" alt="Shiftify">
 
       <?php if ($empresa): ?>
         <!-- En todas las pantallas: la persona siempre sabe en qué negocio está su turno -->
         <?php if (!empty($esDemo)): ?>
-          <p class="turno__demo" role="note"><strong>Esto es una demostración.</strong> Así lo viven los clientes de tu negocio cuando escanean tu QR. <a href="index.html#planes">Ver planes</a></p>
+          <p class="turno__demo" role="note"><strong>Esto es una demostración.</strong> Así lo viven los clientes de tu negocio cuando escanean tu QR. <a href="./#planes">Ver planes</a></p>
         <?php endif; ?>
         <p class="turno__negocio"><span>Estás en la fila de</span> <strong><?= htmlspecialchars($empresa["nombre"]) ?></strong></p>
       <?php endif; ?>
