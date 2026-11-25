@@ -18,6 +18,8 @@
   const urlEstado = script.dataset.estadoUrl;
   const turnoId = script.dataset.turnoId;
   const negocio = script.dataset.negocio;
+  const clavePush = script.dataset.clavePush;
+  const urlSuscribir = script.dataset.suscribirUrl;
   let estado = script.dataset.estado;
   let antes = Number(script.dataset.antes || 0);
 
@@ -146,6 +148,44 @@
 
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("sw.js").then((r) => { registroSw = r; }).catch(() => {});
+    // Llegó un push (la caja lo llamó): ponerse al día ya, sin esperar la vuelta
+    navigator.serviceWorker.addEventListener("message", (e) => {
+      if (e.data && e.data.tipo === "push") revisar();
+    });
+  }
+
+  // ---------- Push: el aviso llega aunque esté en otra app o con el celular bloqueado ----------
+  function claveABytes(base64) {
+    const relleno = "=".repeat((4 - (base64.length % 4)) % 4);
+    const binario = atob((base64 + relleno).replace(/-/g, "+").replace(/_/g, "/"));
+    return Uint8Array.from(binario, (c) => c.charCodeAt(0));
+  }
+
+  async function activarPush(pedirPermiso) {
+    if (!("serviceWorker" in navigator) || !("PushManager" in window) || !("Notification" in window) || !clavePush) {
+      return "sin-soporte";
+    }
+    let permiso = Notification.permission;
+    if (permiso === "default" && pedirPermiso) permiso = await Notification.requestPermission();
+    if (permiso !== "granted") return permiso;
+
+    const registro = await navigator.serviceWorker.ready;
+    let suscripcion = await registro.pushManager.getSubscription();
+    if (!suscripcion) {
+      suscripcion = await registro.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: claveABytes(clavePush) });
+    }
+    const respuesta = await fetch(urlSuscribir, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
+      body: JSON.stringify({ endpoint: suscripcion.endpoint }),
+    });
+    return respuesta.ok ? "ok" : "error";
+  }
+
+  // Si ya dio permiso antes (otro turno), este turno queda suscrito sin preguntar
+  if ("Notification" in window && Notification.permission === "granted") {
+    activarPush(false).catch(() => {});
   }
 
   if (boton) {
@@ -165,9 +205,16 @@
       boton.textContent = "✓ Aviso activado";
       if (botonPrueba) botonPrueba.hidden = false;
 
-      if ("Notification" in window && Notification.permission === "default") {
-        Notification.requestPermission();
-      }
+      // Push: lo que permite avisar con el celular bloqueado o en otra app
+      activarPush(true).then((resultado) => {
+        if (resultado === "ok") {
+          textoAviso.textContent = "✓ Te avisaremos aunque estés en otra app o con el celular bloqueado. Sube el volumen.";
+        } else if (resultado === "denied") {
+          textoAviso.textContent = "Bloqueaste las notificaciones: solo sonará con esta página abierta. Puedes permitirlas en los ajustes del navegador.";
+        } else if (resultado === "sin-soporte" && /iPhone|iPad/.test(navigator.userAgent)) {
+          textoAviso.textContent = "En iPhone: toca Compartir → «Añadir a pantalla de inicio», abre Shiftify desde ese ícono y activa el aviso otra vez.";
+        }
+      }).catch(() => {});
 
       // Si ya estaba cerca al activar, el pre-aviso sale ahora
       revisar();
