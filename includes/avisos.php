@@ -116,6 +116,7 @@ function avisarTurno(mysqli $conexion, int $turnoId, string $tipo, bool $repetir
 
     foreach ($suscripciones as $s) {
         $codigo = enviarPush($conexion, $s["endpoint"]);
+        error_log("Shiftify push: $tipo turno $turnoId → " . parse_url($s["endpoint"], PHP_URL_HOST) . " respondió $codigo");
         if ($codigo === 404 || $codigo === 410) {
             consultar($conexion, "DELETE FROM suscripciones WHERE id = ?", "i", $s["id"]);
         } elseif ($codigo >= 200 && $codigo < 300) {

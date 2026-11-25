@@ -189,6 +189,16 @@
     return "ok";
   }
 
+  // Deja constancia en el servidor de por qué no se activó (para poder arreglarlo)
+  function reportarFallo(motivo) {
+    fetch(urlSuscribir, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
+      body: JSON.stringify({ error: String(motivo).slice(0, 200) }),
+    }).catch(() => {});
+  }
+
   function mostrarPush(texto, tipo) {
     const linea = $("aviso-push");
     if (!linea) return;
@@ -225,6 +235,7 @@
       // Push: el resultado va en su propia línea, para que el texto del sonido no lo tape
       mostrarPush("⏳ Activando el aviso con el celular bloqueado…", "");
       activarPush(true).then((resultado) => {
+        if (resultado !== "ok") reportarFallo("resultado " + resultado);
         if (resultado === "ok") {
           mostrarPush("✓ Listo: te avisaremos aunque estés en otra app o con el celular bloqueado.", "ok");
         } else if (resultado === "denied") {
@@ -243,6 +254,7 @@
           mostrarPush("✗ No se pudo registrar el aviso. Recarga la página y vuelve a tocar el botón.", "error");
         }
       }).catch((e) => {
+        reportarFallo(e && e.message ? e.message : e);
         mostrarPush("✗ No se pudo activar el aviso con el celular bloqueado (" + (e && e.message ? e.message : e) + "). Recarga y vuelve a intentarlo.", "error");
       });
 
