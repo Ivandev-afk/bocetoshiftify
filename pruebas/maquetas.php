@@ -18,7 +18,7 @@ const DESTINO = RAIZ . "/pantallas";
 
 // Enlaces de la aplicación → maqueta equivalente
 const ENLACES = [
-    "index.html"   => "../index.html",
+    "index.html"   => "../",
     "./"           => "../",
     "login.php"    => "login.html",
     "registro.php" => "registro.html",
@@ -56,7 +56,7 @@ function barraRecorrido(string $archivo): string
     $html = "\n  <nav class=\"recorrido\" aria-label=\"Recorrido por las pantallas\">";
     $html .= $anterior
         ? "\n    <a class=\"recorrido__boton\" href=\"$anterior\" rel=\"prev\"><span aria-hidden=\"true\">←</span> <span class=\"recorrido__texto\">" . RECORRIDO[$anterior] . "</span></a>"
-        : "\n    <a class=\"recorrido__boton\" href=\"../index.html\"><span aria-hidden=\"true\">←</span> <span class=\"recorrido__texto\">Inicio</span></a>";
+        : "\n    <a class=\"recorrido__boton\" href=\"../\"><span aria-hidden=\"true\">←</span> <span class=\"recorrido__texto\">Inicio</span></a>";
     $html .= "\n    <a class=\"recorrido__centro\" href=\"index.html\">" . ($i + 1) . " de " . count($nombres) . " · Todas</a>";
     $html .= $siguiente
         ? "\n    <a class=\"recorrido__boton recorrido__boton--siguiente\" href=\"$siguiente\" rel=\"next\"><span class=\"recorrido__texto\">" . RECORRIDO[$siguiente] . "</span> <span aria-hidden=\"true\">→</span></a>"
