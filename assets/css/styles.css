@@ -3560,3 +3560,24 @@ body:has(.recorrido) {
   font-weight: var(--peso-semi);
   text-decoration: underline;
 }
+
+.turno-aviso__push {
+  margin-top: var(--e-3);
+  padding: var(--e-2) var(--e-3);
+  border-radius: var(--radio-md);
+  background: var(--superficie-base);
+  color: var(--contenido-medio);
+  font-size: var(--texto-sm);
+  text-align: left;
+}
+
+.turno-aviso__push--ok {
+  background: color-mix(in srgb, var(--dato-positivo) 12%, var(--superficie-elevada));
+  color: var(--dato-positivo);
+  font-weight: var(--peso-semi);
+}
+
+.turno-aviso__push--error {
+  background: color-mix(in srgb, var(--negativo, #DC2626) 10%, var(--superficie-elevada));
+  color: var(--negativo, #B91C1C);
+}
