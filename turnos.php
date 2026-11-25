@@ -68,6 +68,17 @@ if ($accion === "crear") {
         consultar($conexion, "UPDATE cajas SET minutos = ? WHERE id = ?", "ii", $minutos, $cajaId);
         $_SESSION["aviso"] = "Tu caja: ~$minutos min por atención.";
     }
+} elseif ($accion === "rellamar") {
+    // «Volver a llamar»: solo el asesor de la caja, y solo si está atendiendo a alguien
+    $rellamado = consultar($conexion, "
+        SELECT t.id, t.numero, t.nombre FROM turnos t JOIN cajas c ON c.id = t.caja_id
+        WHERE c.id = ? AND c.empresa_id = ? AND c.usuario_id = ? AND t.estado = 'atendiendo'
+    ", "iii", $cajaId, $empresaId, $usuarioId)->fetch_assoc();
+    if ($rellamado) {
+        $_SESSION["aviso"] = "Volviste a llamar a " . codigoTurno($rellamado["numero"]) . " · " . $rellamado["nombre"] . ".";
+    } else {
+        $_SESSION["error"] = "No hay a quién volver a llamar en esa caja.";
+    }
 } elseif (in_array($accion, ["tomar", "dejar", "liberar", "siguiente", "finalizar"], true)) {
     // Todo o nada. Bloquear la fila de la empresa ordena a los asesores que
     // actúan al mismo tiempo: uno termina antes de que empiece el otro.
@@ -124,7 +135,7 @@ if ($accion === "crear") {
             $siguiente = consultar($conexion, "SELECT id, numero, nombre FROM turnos WHERE empresa_id = ? AND estado = 'esperando' AND creado >= CURDATE() AND creado < CURDATE() + INTERVAL 1 DAY AND (caja_id = ? OR caja_id IS NULL) ORDER BY numero LIMIT 1 FOR UPDATE", "ii", $empresaId, $caja["id"])->fetch_assoc();
 
             if ($siguiente) {
-                consultar($conexion, "UPDATE turnos SET estado = 'atendiendo', caja_id = ?, llamado = NOW() WHERE id = ?", "ii", $caja["id"], $siguiente["id"]);
+                consultar($conexion, "UPDATE turnos SET estado = 'atendiendo', caja_id = ?, llamado = NOW(), llamadas = 1, ultimo_llamado = NOW(), confirmado = NULL WHERE id = ?", "ii", $caja["id"], $siguiente["id"]);
                 $_SESSION["aviso"] = nombreCaja($caja["numero"]) . " llama a " . codigoTurno($siguiente["numero"]) . " · " . $siguiente["nombre"] . ".";
             } else {
                 $_SESSION["aviso"] = "No hay nadie más en la fila.";
@@ -144,7 +155,7 @@ header("Location: panel.php");
 // Avisos push (ya fuera de la transacción, para no frenar a otras cajas):
 // a quien llamaron, «¡Te toca!»; a quien quedó con 0 o 1 persona delante, «¡Ya casi!».
 // Primero se le responde al asesor y después se mandan: así nunca espera por ellos.
-if ($accion === "siguiente" && !empty($siguiente)) {
+if (($accion === "siguiente" && !empty($siguiente)) || ($accion === "rellamar" && !empty($rellamado))) {
     session_write_close();
     ignore_user_abort(true);
     header("Content-Length: 0");
@@ -155,6 +166,11 @@ if ($accion === "siguiente" && !empty($siguiente)) {
     flush();
 
     require_once "includes/avisos.php";
+    if ($accion === "rellamar") {
+        rellamarTurno($conexion, (int) $rellamado["id"]);
+        $conexion->close();
+        exit;
+    }
     avisarTurno($conexion, (int) $siguiente["id"], "llamado");
 
     $proximos = consultar($conexion, "

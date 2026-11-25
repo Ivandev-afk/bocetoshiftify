@@ -35,10 +35,12 @@ $codigo = codigoTurno($turno["numero"]);
 $url = "turno.php?e=" . urlencode($fila["slug"]);
 
 if ($turno["estado"] === "atendiendo") {
+    $otraVez = $turno["llamadas"] > 1 ? " (te llamamos de nuevo: {$turno['llamadas']} de 3)" : "";
     $respuesta = [
         "titulo"  => "🔔 ¡Te toca! $codigo",
-        "cuerpo"  => "Acércate a la " . ($turno["caja"] ? nombreCaja($turno["caja"]) : "ventanilla") . " · " . $turno["negocio"],
-        "llamado" => true,
+        "cuerpo"  => "Acércate a la " . ($turno["caja"] ? nombreCaja($turno["caja"]) : "ventanilla") . " · " . $turno["negocio"] . $otraVez,
+        // Ya respondió «Ya voy»: el aviso no insiste
+        "llamado" => !$turno["confirmado"],
     ];
 } elseif ($turno["estado"] === "esperando") {
     $respuesta = [

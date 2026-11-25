@@ -21,6 +21,8 @@ if ($liberadas = liberarCajasInactivas($conexion, $empresaId)) {
 $cajas = consultar($conexion, "
     SELECT c.id, c.numero, c.usuario_id, c.minutos, u.nombre AS asesor,
            t.numero AS turno, t.nombre, DATE_FORMAT(t.llamado, '%H:%i') AS hora,
+           t.llamadas, t.confirmado IS NOT NULL AS confirmado,
+           TIMESTAMPDIFF(SECOND, t.ultimo_llamado, NOW()) AS hace_llamado,
            (SELECT COUNT(*) FROM turnos a
             WHERE a.caja_id = c.id AND a.estado = 'atendido' AND a.finalizado >= CURDATE() AND a.finalizado < CURDATE() + INTERVAL 1 DAY) AS atendidos,
            (SELECT COUNT(*) FROM turnos e
@@ -145,6 +147,14 @@ $paginaActual = "panel";
               <p class="app-actual__codigo"><?= codigoTurno($caja["turno"]) ?></p>
               <p class="app-actual__nombre"><?= htmlspecialchars($caja["nombre"]) ?></p>
               <p class="app-nota">Llamado a las <?= $caja["hora"] ?></p>
+              <?php if ($caja["confirmado"]): ?>
+                <p class="app-llamado app-llamado--viene">✓ Viene en camino</p>
+              <?php else: ?>
+                <!-- Sin «Ya voy»: se le vuelve a llamar solo cada 30 s, hasta 3 veces -->
+                <p class="app-llamado<?= $caja["llamadas"] >= 3 ? " app-llamado--sin-respuesta" : "" ?>">
+                  🔔 Llamado <?= (int) $caja["llamadas"] ?> de 3 · hace <?= max(0, (int) $caja["hace_llamado"]) ?> s<?= $caja["llamadas"] >= 3 ? " · no responde" : "" ?>
+                </p>
+              <?php endif; ?>
             <?php else: ?>
               <p class="app-caja__vacia"><?= $libre ? "Cerrada" : "Nadie en atención." ?></p>
             <?php endif; ?>
@@ -178,6 +188,11 @@ $paginaActual = "panel";
                   <button class="boton boton--pequeno" type="submit"<?= $caja["en_fila"] + $sinCaja ? "" : " disabled" ?>>Llamar siguiente <span aria-hidden="true">→</span></button>
                 </form>
                 <?php if ($caja["turno"] !== null): ?>
+                  <form action="turnos.php" method="POST">
+                    <input type="hidden" name="accion" value="rellamar">
+                    <input type="hidden" name="caja" value="<?= $caja["id"] ?>">
+                    <button class="boton boton--claro boton--pequeno" type="submit">🔔 Volver a llamar</button>
+                  </form>
                   <form action="turnos.php" method="POST">
                     <input type="hidden" name="accion" value="finalizar">
                     <input type="hidden" name="caja" value="<?= $caja["id"] ?>">
@@ -281,6 +296,6 @@ $paginaActual = "panel";
 
   <!-- Otros asesores mueven la fila: cada 10 s se traen solo las partes que cambian
        (métricas, cajas y fila), sin recargar ni mover la página -->
-  <script src="assets/js/panel-vivo.js?v=1"></script>
+  <script src="assets/js/panel-vivo.js?v=2"></script>
 </body>
 </html>

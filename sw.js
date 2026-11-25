@@ -32,6 +32,8 @@ self.addEventListener("push", (evento) => {
       icon: new URL("assets/img/shiftify-logo.png", self.registration.scope).href,
       badge: new URL("assets/img/shiftify-logo.png", self.registration.scope).href,
       data: { url: new URL(datos.url, self.registration.scope).href },
+      // En el llamado, responder sin abrir la página
+      actions: datos.llamado ? [{ action: "voy", title: "✋ Ya voy" }] : [],
     });
 
     // Si la página del turno está abierta, que se ponga al día (suena el timbre)
@@ -42,6 +44,22 @@ self.addEventListener("push", (evento) => {
 
 self.addEventListener("notificationclick", (evento) => {
   evento.notification.close();
+
+  // «Ya voy» desde la notificación: se confirma y la caja deja de insistir
+  if (evento.action === "voy") {
+    evento.waitUntil((async () => {
+      const suscripcion = await self.registration.pushManager.getSubscription();
+      await fetch(new URL("confirmar.php", self.registration.scope), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ endpoint: suscripcion ? suscripcion.endpoint : "" }),
+      }).catch(() => {});
+      const ventanas = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
+      ventanas.forEach((v) => v.postMessage({ tipo: "push" }));
+    })());
+    return;
+  }
+
   const destino = (evento.notification.data && evento.notification.data.url) || self.registration.scope;
   evento.waitUntil(
     self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((ventanas) => {

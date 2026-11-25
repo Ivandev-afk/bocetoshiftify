@@ -60,6 +60,10 @@ CREATE TABLE IF NOT EXISTS turnos (
     caja_id    INT NULL,
     creado     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     llamado    TIMESTAMP NULL,
+    -- Volver a llamar: veces que se le llamó, la última, y si respondió «Ya voy»
+    llamadas       INT NOT NULL DEFAULT 0,
+    ultimo_llamado TIMESTAMP NULL,
+    confirmado     TIMESTAMP NULL,
     finalizado TIMESTAMP NULL,
     UNIQUE (empresa_id, numero),
     FOREIGN KEY (empresa_id) REFERENCES empresas (id),

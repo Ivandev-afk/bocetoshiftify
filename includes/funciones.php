@@ -257,6 +257,7 @@ function turnoPorId(mysqli $conexion, int $turnoId, ?int $empresaId = null): ?ar
     // Si ella no eligió caja, cualquiera de las cajas la puede llamar: cuentan todos.
     return consultar($conexion, "
         SELECT t.id, t.empresa_id, t.numero, t.nombre, t.estado, t.caja_id, c.numero AS caja, e.nombre AS negocio,
+               t.llamadas, t.confirmado IS NOT NULL AS confirmado,
                t.estado = 'esperando' AND t.creado < CURDATE() AS vencido,
                (SELECT COUNT(*) FROM turnos f
                 WHERE f.empresa_id = t.empresa_id AND f.estado = 'esperando'

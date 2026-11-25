@@ -3581,3 +3581,37 @@ body:has(.recorrido) {
   background: color-mix(in srgb, var(--negativo, #DC2626) 10%, var(--superficie-elevada));
   color: var(--negativo, #B91C1C);
 }
+
+/* Estado del llamado en la caja: veces llamado, o «Viene en camino» */
+.app-llamado {
+  margin-top: var(--e-2);
+  padding: 0.3rem 0.6rem;
+  border-radius: var(--radio-md);
+  background: color-mix(in srgb, var(--acento-calido) 16%, var(--superficie-elevada));
+  color: var(--contenido-fuerte);
+  font-size: var(--texto-xs, 0.75rem);
+  font-weight: var(--peso-semi);
+}
+
+.app-llamado--viene {
+  background: color-mix(in srgb, var(--dato-positivo) 14%, var(--superficie-elevada));
+  color: var(--dato-positivo);
+}
+
+.app-llamado--sin-respuesta {
+  background: color-mix(in srgb, var(--negativo, #DC2626) 12%, var(--superficie-elevada));
+  color: var(--negativo, #B91C1C);
+}
+
+/* «Ya voy» en la pantalla verde del llamado */
+.turno__voy {
+  width: 100%;
+  margin-top: var(--e-5);
+  font-size: var(--texto-lg);
+}
+
+.turno__voy-ok {
+  margin-top: var(--e-4);
+  color: var(--dato-positivo);
+  font-weight: var(--peso-semi);
+}

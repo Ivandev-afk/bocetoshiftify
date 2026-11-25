@@ -38,4 +38,6 @@ echo json_encode([
     "antes"   => (int) $turno["antes"],
     "minutos" => $minutos,
     "caja"    => $turno["caja"] ? nombreCaja($turno["caja"]) : null,
+    "llamadas"   => (int) $turno["llamadas"],
+    "confirmado" => (bool) $turno["confirmado"],
 ]);
