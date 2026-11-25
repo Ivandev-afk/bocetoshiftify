@@ -169,7 +169,11 @@
     if (permiso === "default" && pedirPermiso) permiso = await Notification.requestPermission();
     if (permiso !== "granted") return permiso;
 
-    const registro = await navigator.serviceWorker.ready;
+    // Si el service worker no se pudo instalar, ready no termina nunca: se corta a los 8 s
+    const registro = await Promise.race([
+      navigator.serviceWorker.ready,
+      new Promise((_, falla) => setTimeout(() => falla(new Error("el servicio de avisos no arrancó")), 8000)),
+    ]);
     let suscripcion = await registro.pushManager.getSubscription();
     if (!suscripcion) {
       suscripcion = await registro.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: claveABytes(clavePush) });
@@ -180,12 +184,23 @@
       credentials: "same-origin",
       body: JSON.stringify({ endpoint: suscripcion.endpoint }),
     });
-    return respuesta.ok ? "ok" : "error";
+    if (!respuesta.ok) throw new Error("el servidor respondió " + respuesta.status);
+    return "ok";
+  }
+
+  function mostrarPush(texto, tipo) {
+    const linea = $("aviso-push");
+    if (!linea) return;
+    linea.hidden = false;
+    linea.textContent = texto;
+    linea.className = "turno-aviso__push" + (tipo ? " turno-aviso__push--" + tipo : "");
   }
 
   // Si ya dio permiso antes (otro turno), este turno queda suscrito sin preguntar
   if ("Notification" in window && Notification.permission === "granted") {
-    activarPush(false).catch(() => {});
+    activarPush(false).then((r) => {
+      if (r === "ok") mostrarPush("✓ Aviso con el celular bloqueado activo para este turno.", "ok");
+    }).catch(() => {});
   }
 
   if (boton) {
@@ -206,15 +221,29 @@
       if (botonPrueba) botonPrueba.hidden = false;
 
       // Push: lo que permite avisar con el celular bloqueado o en otra app
+      // Push: el resultado va en su propia línea, para que el texto del sonido no lo tape
+      mostrarPush("⏳ Activando el aviso con el celular bloqueado…", "");
       activarPush(true).then((resultado) => {
         if (resultado === "ok") {
-          textoAviso.textContent = "✓ Te avisaremos aunque estés en otra app o con el celular bloqueado. Sube el volumen.";
+          mostrarPush("✓ Listo: te avisaremos aunque estés en otra app o con el celular bloqueado.", "ok");
         } else if (resultado === "denied") {
-          textoAviso.textContent = "Bloqueaste las notificaciones: solo sonará con esta página abierta. Puedes permitirlas en los ajustes del navegador.";
-        } else if (resultado === "sin-soporte" && /iPhone|iPad/.test(navigator.userAgent)) {
-          textoAviso.textContent = "En iPhone: toca Compartir → «Añadir a pantalla de inicio», abre Shiftify desde ese ícono y activa el aviso otra vez.";
+          mostrarPush("✗ Bloqueaste las notificaciones: solo sonará con esta página abierta. Permítelas en los ajustes del navegador (candado junto a la dirección) y vuelve a tocar el botón.", "error");
+          boton.disabled = false;
+          boton.textContent = "🔔 Activar aviso con sonido";
+        } else if (resultado === "default") {
+          mostrarPush("No respondiste al permiso de notificaciones. Vuelve a tocar el botón y elige «Permitir».", "error");
+          boton.disabled = false;
+          boton.textContent = "🔔 Activar aviso con sonido";
+        } else if (resultado === "sin-soporte") {
+          mostrarPush(/iPhone|iPad/.test(navigator.userAgent)
+            ? "En iPhone: toca Compartir → «Añadir a pantalla de inicio», abre Shiftify desde ese ícono y activa el aviso otra vez."
+            : "Este navegador no permite avisos con el celular bloqueado. Usa Chrome o deja esta página abierta.", "error");
+        } else {
+          mostrarPush("✗ No se pudo registrar el aviso. Recarga la página y vuelve a tocar el botón.", "error");
         }
-      }).catch(() => {});
+      }).catch((e) => {
+        mostrarPush("✗ No se pudo activar el aviso con el celular bloqueado (" + (e && e.message ? e.message : e) + "). Recarga y vuelve a intentarlo.", "error");
+      });
 
       // Si ya estaba cerca al activar, el pre-aviso sale ahora
       revisar();
