@@ -233,7 +233,7 @@ $conexion->close();
 
   <?php if ($turno && !$mostrarFormulario && $turno["estado"] !== "atendido"): ?>
     <!-- Sigue la fila sin recargar: avisa con sonido, vibración y notificación -->
-    <script src="assets/js/aviso-turno.js?v=6"
+    <script src="assets/js/aviso-turno.js?v=7"
             data-estado-url="estado_turno.php?e=<?= urlencode($empresa["slug"]) ?>"
             data-turno-id="<?= (int) $turno["id"] ?>"
             data-estado="<?= htmlspecialchars($turno["estado"]) ?>"
