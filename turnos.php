@@ -138,8 +138,40 @@ if ($accion === "crear") {
 // Cualquier acción cuenta como actividad del asesor en su caja
 marcarActividad($conexion, $usuarioId);
 
-$conexion->close();
-
 // Volver al panel (así recargar la página no repite la acción)
 header("Location: panel.php");
+
+// Avisos push (ya fuera de la transacción, para no frenar a otras cajas):
+// a quien llamaron, «¡Te toca!»; a quien quedó con 0 o 1 persona delante, «¡Ya casi!».
+// Primero se le responde al asesor y después se mandan: así nunca espera por ellos.
+if ($accion === "siguiente" && !empty($siguiente)) {
+    session_write_close();
+    ignore_user_abort(true);
+    header("Content-Length: 0");
+    header("Connection: close");
+    while (ob_get_level() > 0) {
+        ob_end_flush();
+    }
+    flush();
+
+    require_once "includes/avisos.php";
+    avisarTurno($conexion, (int) $siguiente["id"], "llamado");
+
+    $proximos = consultar($conexion, "
+        SELECT t.id FROM turnos t
+        JOIN suscripciones s ON s.turno_id = t.id AND s.preaviso = 0
+        WHERE t.empresa_id = ? AND t.estado = 'esperando' AND t.creado >= CURDATE() AND t.creado < CURDATE() + INTERVAL 1 DAY
+        GROUP BY t.id
+        ORDER BY MIN(t.numero)
+        LIMIT 6
+    ", "i", $empresaId)->fetch_all(MYSQLI_ASSOC);
+    foreach ($proximos as $proximo) {
+        $datos = turnoPorId($conexion, (int) $proximo["id"], $empresaId);
+        if ($datos && $datos["antes"] <= 1) {
+            avisarTurno($conexion, (int) $proximo["id"], "preaviso");
+        }
+    }
+}
+
+$conexion->close();
 exit;

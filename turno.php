@@ -71,6 +71,13 @@ if ($empresa) {
         ? minutosEstimados(minutosPorCaja($conexion, $empresaId), $turno["antes"] + 1, $turno["caja_id"] !== null ? (int) $turno["caja_id"] : null, minutosBase($conexion, $empresaId))
         : 0;
 
+    // Clave pública para que el celular se suscriba a los avisos push
+    $clavePush = "";
+    if ($turno && $turno["estado"] !== "atendido") {
+        require_once "includes/avisos.php";
+        $clavePush = clavesVapid($conexion)["publica"];
+    }
+
     // Para el formulario: cada caja con su estado y su fila
     $cajas = cajasParaElegir($conexion, $empresaId);
     $cajaPedida = (int) ($_POST["caja"] ?? 0);
@@ -89,6 +96,12 @@ $conexion->close();
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0F172A">
+  <?php if ($empresa): ?>
+    <!-- En iPhone, los avisos push solo funcionan si la página se añade a la pantalla de inicio -->
+    <link rel="manifest" href="manifest.php?e=<?= urlencode($empresa["slug"]) ?>">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="apple-touch-icon" href="assets/img/shiftify-logo.png">
+  <?php endif; ?>
   <title><?= $empresa ? "Turno en " . htmlspecialchars($empresa["nombre"]) : "Tu turno" ?> | Shiftify</title>
   <link rel="stylesheet" href="assets/css/tokens.css?v=6">
   <link rel="stylesheet" href="assets/css/styles.css?v=13">
@@ -203,12 +216,14 @@ $conexion->close();
 
   <?php if ($turno && !$mostrarFormulario && $turno["estado"] !== "atendido"): ?>
     <!-- Sigue la fila sin recargar: avisa con sonido, vibración y notificación -->
-    <script src="assets/js/aviso-turno.js?v=3"
+    <script src="assets/js/aviso-turno.js?v=4"
             data-estado-url="estado_turno.php?e=<?= urlencode($empresa["slug"]) ?>"
             data-turno-id="<?= (int) $turno["id"] ?>"
             data-estado="<?= htmlspecialchars($turno["estado"]) ?>"
             data-antes="<?= (int) $turno["antes"] ?>"
-            data-negocio="<?= htmlspecialchars($empresa["nombre"]) ?>"></script>
+            data-negocio="<?= htmlspecialchars($empresa["nombre"]) ?>"
+            data-clave-push="<?= htmlspecialchars($clavePush) ?>"
+            data-suscribir-url="suscribir.php?e=<?= urlencode($empresa["slug"]) ?>"></script>
   <?php endif; ?>
 </body>
 </html>

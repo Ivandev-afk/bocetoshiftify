@@ -22,7 +22,9 @@ function iniciales(string $nombre): string
 function consultar(mysqli $conexion, string $sql, string $tipos, ...$valores): mysqli_result|false
 {
     $stmt = $conexion->prepare($sql);
-    $stmt->bind_param($tipos, ...$valores);
+    if ($tipos !== "") {
+        $stmt->bind_param($tipos, ...$valores);
+    }
     $stmt->execute();
     $resultado = $stmt->get_result();
     $stmt->close();
@@ -246,26 +248,34 @@ function cajaElegida(mysqli $conexion, int $empresaId, string $valor): int|null|
 
 // Turno guardado en la sesión del visitante para esta empresa (lo usan turno.php y
 // estado_turno.php), con cuántas personas tiene delante
-function turnoDeLaSesion(mysqli $conexion, int $empresaId): ?array
+// Un turno con su caja, si ya venció y cuántas personas tiene delante.
+// $empresaId = null: no se filtra por empresa (lo usa el aviso push, que solo conoce el turno).
+function turnoPorId(mysqli $conexion, int $turnoId, ?int $empresaId = null): ?array
 {
-    if (!isset($_SESSION["mis_turnos"][$empresaId])) {
-        return null;
-    }
-
     // Antes de la persona va quien llegó primero y lo puede atender su misma caja:
     // los de su caja y los que esperan «la primera caja libre».
     // Si ella no eligió caja, cualquiera de las cajas la puede llamar: cuentan todos.
-    $turno = consultar($conexion, "
-        SELECT t.id, t.numero, t.nombre, t.estado, t.caja_id, c.numero AS caja,
+    return consultar($conexion, "
+        SELECT t.id, t.empresa_id, t.numero, t.nombre, t.estado, t.caja_id, c.numero AS caja, e.nombre AS negocio,
                t.estado = 'esperando' AND t.creado < CURDATE() AS vencido,
                (SELECT COUNT(*) FROM turnos f
                 WHERE f.empresa_id = t.empresa_id AND f.estado = 'esperando'
                   AND f.creado >= CURDATE() AND f.creado < CURDATE() + INTERVAL 1 DAY AND f.numero < t.numero
                   AND (t.caja_id IS NULL OR f.caja_id IS NULL OR f.caja_id = t.caja_id)) AS antes
         FROM turnos t
+        JOIN empresas e ON e.id = t.empresa_id
         LEFT JOIN cajas c ON c.id = t.caja_id
-        WHERE t.id = ? AND t.empresa_id = ?
-    ", "ii", $_SESSION["mis_turnos"][$empresaId], $empresaId)->fetch_assoc();
+        WHERE t.id = ? AND (? IS NULL OR t.empresa_id = ?)
+    ", "iii", $turnoId, $empresaId, $empresaId)->fetch_assoc();
+}
+
+function turnoDeLaSesion(mysqli $conexion, int $empresaId): ?array
+{
+    if (!isset($_SESSION["mis_turnos"][$empresaId])) {
+        return null;
+    }
+
+    $turno = turnoPorId($conexion, (int) $_SESSION["mis_turnos"][$empresaId], $empresaId);
 
     // Un turno cancelado, o que quedó esperando otro día, ya no está en la fila:
     // la persona puede pedir uno nuevo
