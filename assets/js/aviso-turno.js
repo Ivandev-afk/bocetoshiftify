@@ -22,6 +22,7 @@
   const urlSuscribir = script.dataset.suscribirUrl;
   let estado = script.dataset.estado;
   let antes = Number(script.dataset.antes || 0);
+  let llamadas = Number(script.dataset.llamadas || 0);
 
   const clavePreaviso = "shiftify-preaviso-" + turnoId;
   const tituloOriginal = document.title;
@@ -316,6 +317,20 @@
           location.reload();
         }
         return;
+      }
+
+      // Ya lo llamaron: la caja lo vuelve a llamar si no responde «Ya voy»
+      if (datos.estado === "atendiendo") {
+        if (datos.confirmado && !document.querySelector(".turno__voy-ok")) {
+          location.reload();
+          return;
+        }
+        if (datos.llamadas > llamadas) {
+          llamadas = datos.llamadas;
+          sonar(timbre);
+          vibrar([600, 200, 600, 200, 900]);
+          parpadear("🔔 ¡Te están llamando!");
+        }
       }
 
       if (datos.estado === "esperando") {

@@ -105,12 +105,14 @@ function enviarPush(mysqli $conexion, string $endpoint): int
 
 // Avisa a todos los celulares suscritos a un turno, una sola vez por tipo
 // ("preaviso" o "llamado"). Borra las suscripciones que ya no existen.
-function avisarTurno(mysqli $conexion, int $turnoId, string $tipo): void
+// $repetir = true: se manda aunque ya se haya mandado (volver a llamar).
+function avisarTurno(mysqli $conexion, int $turnoId, string $tipo, bool $repetir = false): void
 {
     if (!in_array($tipo, ["preaviso", "llamado"], true) || !function_exists("curl_init")) {
         return;
     }
-    $suscripciones = consultar($conexion, "SELECT id, endpoint FROM suscripciones WHERE turno_id = ? AND $tipo = 0", "i", $turnoId)->fetch_all(MYSQLI_ASSOC);
+    $filtro = $repetir ? "" : " AND $tipo = 0";
+    $suscripciones = consultar($conexion, "SELECT id, endpoint FROM suscripciones WHERE turno_id = ?$filtro", "i", $turnoId)->fetch_all(MYSQLI_ASSOC);
 
     foreach ($suscripciones as $s) {
         $codigo = enviarPush($conexion, $s["endpoint"]);
@@ -122,4 +124,35 @@ function avisarTurno(mysqli $conexion, int $turnoId, string $tipo): void
             error_log("Shiftify push: el servicio respondió $codigo para la suscripción {$s['id']}");
         }
     }
+}
+
+// ---------- Volver a llamar a quien no responde ----------
+
+// Llamadas como máximo (la primera + 2 repeticiones) y segundos entre una y otra
+const LLAMADAS_MAXIMAS = 3;
+const SEGUNDOS_ENTRE_LLAMADAS = 30;
+
+// Vuelve a llamar a un turno que la caja está atendiendo: suma la llamada y
+// manda otra vez el aviso push (la página del cliente también lo nota).
+function rellamarTurno(mysqli $conexion, int $turnoId): void
+{
+    consultar($conexion, "UPDATE turnos SET llamadas = llamadas + 1, ultimo_llamado = NOW() WHERE id = ? AND estado = 'atendiendo'", "i", $turnoId);
+    avisarTurno($conexion, $turnoId, "llamado", true);
+}
+
+// Re-llamado automático: a quien no ha respondido «Ya voy», cada 30 s, hasta 3 llamadas.
+// Lo dispara el panel de los asesores (panel-vivo.js → rellamar.php) cada 10 s.
+function rellamarPendientes(mysqli $conexion, int $empresaId): int
+{
+    $pendientes = consultar($conexion, "
+        SELECT id FROM turnos
+        WHERE empresa_id = ? AND estado = 'atendiendo' AND confirmado IS NULL
+          AND llamadas BETWEEN 1 AND ? AND ultimo_llamado < NOW() - INTERVAL ? SECOND
+    ", "iii", $empresaId, LLAMADAS_MAXIMAS - 1, SEGUNDOS_ENTRE_LLAMADAS)->fetch_all(MYSQLI_ASSOC);
+
+    foreach ($pendientes as $turno) {
+        rellamarTurno($conexion, (int) $turno["id"]);
+    }
+
+    return count($pendientes);
 }

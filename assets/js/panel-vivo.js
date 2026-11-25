@@ -33,7 +33,16 @@
     }
   }
 
-  setInterval(actualizar, CADA);
+  // Re-llamado automático: a quien no respondió «Ya voy», otro aviso cada 30 s (hasta 3).
+  // No se espera la respuesta: el servidor contesta de una y manda los avisos después.
+  function rellamar() {
+    fetch("rellamar.php", { method: "POST", credentials: "same-origin" }).catch(() => {});
+  }
+
+  setInterval(() => {
+    rellamar();
+    actualizar();
+  }, CADA);
   // Al volver a la pestaña, al día de inmediato
   document.addEventListener("visibilitychange", () => {
     if (!document.hidden) actualizar();

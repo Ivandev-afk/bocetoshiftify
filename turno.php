@@ -59,6 +59,11 @@ if ($empresa) {
             $_SESSION["turno_aviso"] = "Cancelaste el turno " . codigoTurno($turno["numero"]) . ". Puedes pedir uno nuevo cuando quieras.";
             header("Location: $esta");
             exit;
+        } elseif ($accion === "confirmar" && $turno && $turno["estado"] === "atendiendo") {
+            // «Ya voy»: se dejan de repetir los llamados y la caja ve «Viene en camino»
+            consultar($conexion, "UPDATE turnos SET confirmado = NOW() WHERE id = ? AND confirmado IS NULL", "i", $turno["id"]);
+            header("Location: $esta");
+            exit;
         } elseif ($accion === "cancelar") {
             // Ya lo llamaron: no se cancela, se muestra lo que hay
             header("Location: $esta");
@@ -202,6 +207,16 @@ $conexion->close();
         <h1 class="turno__llamado">¡TE TOCA!</h1>
         <p class="turno__codigo"><?= codigoTurno($turno["numero"]) ?></p>
         <p class="turno__estado turno__estado--ahora">Acércate a la <strong><?= $turno["caja"] ? nombreCaja($turno["caja"]) : "ventanilla" ?></strong></p>
+        <?php if ($turno["confirmado"]): ?>
+          <p class="turno__voy-ok">✓ Le avisamos a la caja que vas en camino.</p>
+        <?php else: ?>
+          <!-- Mientras no responda, la caja lo vuelve a llamar cada 30 s (hasta 3 veces) -->
+          <form action="<?= htmlspecialchars($esta) ?>" method="POST">
+            <input type="hidden" name="accion" value="confirmar">
+            <button class="boton turno__voy" type="submit">✋ Ya voy</button>
+          </form>
+          <p class="turno__nota">Si no respondes, te volveremos a llamar.</p>
+        <?php endif; ?>
 
       <?php else: ?>
         <h1>¡Gracias, <?= htmlspecialchars($turno["nombre"]) ?>!</h1>
@@ -218,11 +233,12 @@ $conexion->close();
 
   <?php if ($turno && !$mostrarFormulario && $turno["estado"] !== "atendido"): ?>
     <!-- Sigue la fila sin recargar: avisa con sonido, vibración y notificación -->
-    <script src="assets/js/aviso-turno.js?v=5"
+    <script src="assets/js/aviso-turno.js?v=6"
             data-estado-url="estado_turno.php?e=<?= urlencode($empresa["slug"]) ?>"
             data-turno-id="<?= (int) $turno["id"] ?>"
             data-estado="<?= htmlspecialchars($turno["estado"]) ?>"
             data-antes="<?= (int) $turno["antes"] ?>"
+            data-llamadas="<?= (int) $turno["llamadas"] ?>"
             data-negocio="<?= htmlspecialchars($empresa["nombre"]) ?>"
             data-clave-push="<?= htmlspecialchars($clavePush) ?>"
             data-suscribir-url="suscribir.php?e=<?= urlencode($empresa["slug"]) ?>"></script>
