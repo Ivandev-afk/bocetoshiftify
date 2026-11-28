@@ -6,6 +6,13 @@
 // 1) pide el XML al servidor por HTTP, 2) lo valida con el DTD local,
 // 3) lo consulta con XPath.
 
+// Script de consola de la práctica: desde un navegador no se ejecuta
+if (PHP_SAPI !== 'cli') {
+    http_response_code(403);
+    header('Content-Type: text/plain; charset=UTF-8');
+    exit("Este script se usa desde la consola: php " . basename(__FILE__));
+}
+
 $url = $argv[1] ?? 'http://localhost:8000/api_xml.php';
 
 // --- 1. Solicitud HTTP al servidor ---------------------------

@@ -4,6 +4,13 @@
 // Paso 1: comprueba que el XML esté BIEN FORMADO.
 // Paso 2: comprueba que sea VÁLIDO frente al DTD indicado en su DOCTYPE.
 
+// Script de consola de la práctica: desde un navegador no se ejecuta
+if (PHP_SAPI !== 'cli') {
+    http_response_code(403);
+    header('Content-Type: text/plain; charset=UTF-8');
+    exit("Este script se usa desde la consola: php " . basename(__FILE__));
+}
+
 $archivo = $argv[1] ?? 'turnos.xml';
 
 // Guardar los errores de libxml en una lista, en vez de mostrarlos como avisos

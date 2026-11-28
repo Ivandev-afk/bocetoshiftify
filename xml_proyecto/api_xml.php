@@ -23,6 +23,23 @@ if (!$empresa) {
     exit;
 }
 
+// La respuesta trae los NOMBRES de los clientes: no puede ser pública.
+// - En el propio equipo (XAMPP, la práctica de XML) responde como siempre.
+// - Publicado en internet, solo a quien inició sesión en el panel de ESE negocio.
+session_start();
+$esLocal = in_array($_SERVER['REMOTE_ADDR'] ?? '', ['127.0.0.1', '::1'], true)
+    && !isset($_SERVER['HTTP_X_FORWARDED_FOR'])
+    && !isset($_SERVER['HTTP_CF_CONNECTING_IP']);
+$esDelNegocio = isset($_SESSION['empresa_id']) && (int) $_SESSION['empresa_id'] === (int) $empresa['id'];
+session_write_close();
+
+if (!$esLocal && !$esDelNegocio) {
+    http_response_code(403);
+    header('Content-Type: text/plain; charset=UTF-8');
+    echo "Prohibido: inicia sesión en el panel de este negocio para ver su fila.";
+    exit;
+}
+
 // 1. Datos: turnos de hoy de esa empresa, en orden de llegada.
 //    espera   = minutos desde que pidió el turno hasta que lo llamaron (o hasta ahora)
 //    duracion = minutos de atención; NULL si todavía no ha terminado
