@@ -3615,3 +3615,26 @@ body:has(.recorrido) {
   color: var(--dato-positivo);
   font-weight: var(--peso-semi);
 }
+
+/* Ayuda antes de pedir turno: dónde abrirlo para que el aviso suene aunque salga */
+.turno-ayuda {
+  margin-top: var(--e-4);
+  padding: var(--e-3) var(--e-4);
+  border: 1px solid color-mix(in srgb, var(--acento-calido) 45%, transparent);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--acento-calido) 14%, var(--superficie-elevada));
+  color: var(--contenido-fuerte);
+  font-size: var(--texto-sm);
+  text-align: left;
+}
+
+.turno-ayuda__boton {
+  display: block;
+  margin-top: var(--e-3);
+  padding: 0.65rem 1rem;
+  border-radius: var(--radio-md);
+  background: var(--acento);
+  color: #fff;
+  font-weight: var(--peso-semi);
+  text-align: center;
+}

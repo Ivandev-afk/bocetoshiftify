@@ -109,7 +109,7 @@ $conexion->close();
   <?php endif; ?>
   <title><?= $empresa ? "Turno en " . htmlspecialchars($empresa["nombre"]) : "Tu turno" ?> | Shiftify</title>
   <link rel="stylesheet" href="assets/css/tokens.css?v=6">
-  <link rel="stylesheet" href="assets/css/styles.css?v=14">
+  <link rel="stylesheet" href="assets/css/styles.css?v=15">
 </head>
 <body class="pagina-turno<?= $turno && $turno["estado"] === "atendiendo" && !$mostrarFormulario ? " pagina-turno--llamado" : "" ?>">
   <main class="turno">
@@ -143,7 +143,10 @@ $conexion->close();
           <p class="app-aviso" role="status"><?= htmlspecialchars($avisoTurno) ?></p>
         <?php endif; ?>
 
-        <form class="app-formulario app-formulario--apilado" action="<?= htmlspecialchars($esta) ?>" method="POST">
+        <!-- Si aquí el aviso no puede sonar con el celular bloqueado, se dice antes de pedir el turno -->
+        <p class="turno-ayuda" id="avisos-ayuda" role="note" hidden></p>
+
+        <form class="app-formulario app-formulario--apilado" id="form-pedir" action="<?= htmlspecialchars($esta) ?>" method="POST">
           <input type="hidden" name="accion" value="pedir">
           <label for="nombre">Tu nombre</label>
           <input id="nombre" name="nombre" type="text" maxlength="100" autocomplete="name" placeholder="Tu nombre" value="<?= htmlspecialchars($nombre) ?>" required>
@@ -174,6 +177,7 @@ $conexion->close();
           </fieldset>
 
           <button class="boton" type="submit">Tomar turno <span aria-hidden="true">→</span></button>
+          <p class="turno__nota">Al tomarlo, permite las notificaciones: así te avisamos aunque estés en otra app.</p>
         </form>
 
       <?php elseif ($turno["estado"] === "esperando"): ?>
@@ -230,6 +234,10 @@ $conexion->close();
       <?php endif; ?>
     </article>
   </main>
+
+  <?php if ($mostrarFormulario): ?>
+    <script src="assets/js/turno-avisos.js?v=1"></script>
+  <?php endif; ?>
 
   <?php if ($turno && !$mostrarFormulario && $turno["estado"] !== "atendido"): ?>
     <!-- Sigue la fila sin recargar: avisa con sonido, vibración y notificación -->
