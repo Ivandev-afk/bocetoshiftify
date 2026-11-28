@@ -3,6 +3,13 @@
 // Uso:  php consultar.php "expresión XPath"
 // Ejemplo: php consultar.php "//turno/cliente/text()"
 
+// Script de consola de la práctica: desde un navegador no se ejecuta
+if (PHP_SAPI !== 'cli') {
+    http_response_code(403);
+    header('Content-Type: text/plain; charset=UTF-8');
+    exit("Este script se usa desde la consola: php " . basename(__FILE__));
+}
+
 $expresion = $argv[1] ?? '';
 
 $documento = new DOMDocument();
